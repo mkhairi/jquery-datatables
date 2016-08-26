@@ -20,4 +20,4 @@ tmp
 *.o
 *.a
 mkmf.log
-Datatables/
+DataTables/
