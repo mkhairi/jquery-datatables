@@ -1,27 +1,23 @@
 require "bundler/gem_tasks"
 
+datatables_dir = "DataTablesSrc" 
+
 namespace :images do
-  image_files = []
-  Dir.glob('DataTables/media/images/*.png') do |src_file|
-    src_filename = File.basename(src_file)
-    tgt_file = "app/assets/images/datatables/#{src_filename}"
 
-    file tgt_file => src_file do
-      cp src_file, tgt_file
-    end
-
-    image_files.push tgt_file
-  end
-
-  desc "Delete images"
+  desc "Delete images directory"
   task :clean do
-    Dir.glob('app/assets/images/datatables/*.png') do |file|
-      File.delete(file)
+   tgt_dir = "app/assets/media/datatables/"
+   rm_rf tgt_dir
+  end
+  
+  desc "Copy images from #{datatables_dir}/media/images/"
+  task :copy do
+    tgt_dir = "app/assets/images/datatables/"
+    mkdir_p tgt_dir
+    Dir.glob("#{datatables_dir}/media/images/*.png") do |src_file|
+      cp src_file, tgt_dir
     end
   end
-
-  desc "Copy images from DataTables/media/images/"
-  task copy: image_files
 
   desc "Setup image assets"
   task setup: [:clean, :copy]
@@ -34,19 +30,19 @@ namespace :javascripts do
    rm_rf "app/assets/javascripts/datatables"
   end
   
-  desc "Copy DataTables/media/js/"
+  desc "Copy #{datatables_dir}/media/js/"
   task :copy do
-    src_dir = "DataTables/media/js/."
+    src_dir = "#{datatables_dir}/media/js/."
     tgt_dir = "app/assets/javascripts/datatables/"
     mkdir_p tgt_dir
     cp_r src_dir, tgt_dir
   end
   
-  desc "Copy DataTables/extensions/*/js"
+  desc "Copy #{datatables_dir}/extensions/*/js"
   task :copy_extensions do
     extensions = %w(AutoFill Buttons ColReorder FixedColumns FixedHeader KeyTable Responsive RowReorder Scroller Select)
     extensions.each do |ext|
-      src_dir = "DataTables/extensions/#{ext}/js/."
+      src_dir = "#{datatables_dir}/extensions/#{ext}/js/."
       tgt_dir = "app/assets/javascripts/datatables/extensions/#{ext}/"
       mkdir_p tgt_dir
       cp_r src_dir, tgt_dir
@@ -63,19 +59,19 @@ namespace :stylesheets do
    rm_rf "app/assets/stylesheets/datatables"
   end
 
-  desc "Copy DataTables/media/css/"
+  desc "Copy #{datatables_dir}/media/css/"
   task :copy do
-    src_dir = "DataTables/media/css/."
+    src_dir = "#{datatables_dir}/media/css/."
     tgt_dir = "app/assets/stylesheets/datatables/"
     mkdir_p tgt_dir
     cp_r src_dir, tgt_dir
   end
   
-  desc "Copy DataTables/extensions/*/css"
+  desc "Copy #{datatables_dir}/extensions/*/css"
   task :copy_extensions do
     extensions = %w(AutoFill Buttons ColReorder FixedColumns FixedHeader KeyTable Responsive RowReorder Scroller Select)
     extensions.each do |ext|
-      src_dir = "DataTables/extensions/#{ext}/css/."
+      src_dir = "#{datatables_dir}/extensions/#{ext}/css/."
       tgt_dir = "app/assets/stylesheets/datatables/extensions/#{ext}/"
       mkdir_p tgt_dir
       cp_r src_dir, tgt_dir
@@ -95,12 +91,13 @@ namespace :stylesheets do
   task setup: [:clean, :copy, :copy_extensions, :fix_urls]
 end
 
-desc "remove minified file .min"
+desc "Remove minified file .min"
 task :cleanup do
-   Dir.glob('app/assets/**/*.min.*').each do |file|
-     rm file
-   end
+  Dir.glob('app/assets/**/*.min.*').each do |file|
+    rm file
+  end
+  rm "app/assets/javascripts/datatables/jquery.js"
 end
 
-desc "Setup asset files"
+desc "Setup or update assets files"
 task setup: ["images:setup", "javascripts:setup", "stylesheets:setup"]
