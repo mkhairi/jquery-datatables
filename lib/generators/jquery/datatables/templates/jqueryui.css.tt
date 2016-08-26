@@ -1,0 +1,11 @@
+@import 'datatables/dataTables.jqueryui.css';
+@import 'datatables/extensions/AutoFill/autoFill.jqueryui.css';
+@import 'datatables/extensions/Buttons/buttons.jqueryui.css';
+@import 'datatables/extensions/ColReorder/colReorder.jqueryui.css';
+@import 'datatables/extensions/FixedColumns/fixedColumns.jqueryui.css';
+@import 'datatables/extensions/FixedHeader/fixedHeader.jqueryui.css';
+@import 'datatables/extensions/KeyTable/keyTable.jqueryui.css';
+@import 'datatables/extensions/Responsive/responsive.jqueryui.css';
+@import 'datatables/extensions/RowReorder/rowReorder.jqueryui.css';
+@import 'datatables/extensions/Scroller/scroller.jqueryui.css';
+@import 'datatables/extensions/Select/select.jqueryui.css';

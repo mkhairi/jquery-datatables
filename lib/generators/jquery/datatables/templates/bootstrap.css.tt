@@ -1,0 +1,11 @@
+@import 'datatables/dataTables.bootstrap.css';
+@import 'datatables/extensions/AutoFill/autoFill.bootstrap.css';
+@import 'datatables/extensions/Buttons/buttons.bootstrap.css';
+@import 'datatables/extensions/ColReorder/colReorder.bootstrap.css';
+@import 'datatables/extensions/FixedColumns/fixedColumns.bootstrap.css';
+@import 'datatables/extensions/FixedHeader/fixedHeader.bootstrap.css';
+@import 'datatables/extensions/KeyTable/keyTable.bootstrap.css';
+@import 'datatables/extensions/Responsive/responsive.bootstrap.css';
+@import 'datatables/extensions/RowReorder/rowReorder.bootstrap.css';
+@import 'datatables/extensions/Scroller/scroller.bootstrap.css';
+@import 'datatables/extensions/Select/select.bootstrap.css';

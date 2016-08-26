@@ -1,0 +1,12 @@
+@import 'datatables/jquery.dataTables.css';
+@import 'datatables/jquery.dataTables_themeroller.css';
+@import 'datatables/extensions/AutoFill/autoFill.dataTables.css';
+@import 'datatables/extensions/Buttons/buttons.dataTables.css';
+@import 'datatables/extensions/ColReorder/colReorder.dataTables.css';
+@import 'datatables/extensions/FixedColumns/fixedColumns.dataTables.css';
+@import 'datatables/extensions/FixedHeader/fixedHeader.dataTables.css';
+@import 'datatables/extensions/KeyTable/keyTable.dataTables.css';
+@import 'datatables/extensions/Responsive/responsive.dataTables.css';
+@import 'datatables/extensions/RowReorder/rowReorder.dataTables.css';
+@import 'datatables/extensions/Scroller/scroller.dataTables.css';
+@import 'datatables/extensions/Select/select.dataTables.css';
