@@ -1,0 +1,12 @@
+//=require datatables/jquery.dataTables.js
+// require datatables/extensions/AutoFill/dataTables.autoFill.js
+// require datatables/extensions/Buttons/dataTables.buttons.js
+// require datatables/extensions/ColReorder/dataTables.colReorder.js
+// require datatables/extensions/FixedColumns/dataTables.fixedColumns.js
+// require datatables/extensions/FixedHeader/dataTables.fixedHeader.js
+// require datatables/extensions/KeyTable/dataTables.keyTable.js
+// require datatables/extensions/Responsive/dataTables.responsive.js
+// require datatables/extensions/RowReorder/dataTables.rowReorder.js
+// require datatables/extensions/Scroller/dataTables.scroller.js
+// require datatables/extensions/Select/dataTables.select.js
+//=require datatables/dataTables.uikit.js

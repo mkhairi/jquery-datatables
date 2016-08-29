@@ -1,1 +1,1 @@
-@import 'datatables/dataTables.material.css';
+*= datatables/dataTables.material.css
