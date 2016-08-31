@@ -1,11 +1,11 @@
-*= datatables/dataTables.foundation.css
-*= datatables/extensions/AutoFill/autoFill.foundation.css
-*= datatables/extensions/Buttons/buttons.foundation.css
-*= datatables/extensions/ColReorder/colReorder.foundation.css
-*= datatables/extensions/FixedColumns/fixedColumns.foundation.css
-*= datatables/extensions/FixedHeader/fixedHeader.foundation.css
-*= datatables/extensions/KeyTable/keyTable.foundation.css
-*= datatables/extensions/Responsive/responsive.foundation.css
-*= datatables/extensions/RowReorder/rowReorder.foundation.css
-*= datatables/extensions/Scroller/scroller.foundation.css
-*= datatables/extensions/Select/select.foundation.css
+*= require datatables/dataTables.foundation
+* require datatables/extensions/AutoFill/autoFill.foundation
+* require datatables/extensions/Buttons/buttons.foundation
+* require datatables/extensions/ColReorder/colReorder.foundation
+* require datatables/extensions/FixedColumns/fixedColumns.foundation
+* require datatables/extensions/FixedHeader/fixedHeader.foundation
+* require datatables/extensions/KeyTable/keyTable.foundation
+* require datatables/extensions/Responsive/responsive.foundation
+* require datatables/extensions/RowReorder/rowReorder.foundation
+* require datatables/extensions/Scroller/scroller.foundation
+* require datatables/extensions/Select/select.foundation

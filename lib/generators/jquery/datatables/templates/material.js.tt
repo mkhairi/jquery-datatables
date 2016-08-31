@@ -1,12 +1,19 @@
-//=require datatables/jquery.dataTables.js
-// require datatables/extensions/AutoFill/dataTables.autoFill.js
-// require datatables/extensions/Buttons/dataTables.buttons.js
-// require datatables/extensions/ColReorder/dataTables.colReorder.js
-// require datatables/extensions/FixedColumns/dataTables.fixedColumns.js
-// require datatables/extensions/FixedHeader/dataTables.fixedHeader.js
-// require datatables/extensions/KeyTable/dataTables.keyTable.js
-// require datatables/extensions/Responsive/dataTables.responsive.js
-// require datatables/extensions/RowReorder/dataTables.rowReorder.js
-// require datatables/extensions/Scroller/dataTables.scroller.js
-// require datatables/extensions/Select/dataTables.select.js
-//=require datatables/dataTables.material.js
+//= require datatables/jquery.dataTables
+
+//optional add '=' enable
+// require datatables/extensions/AutoFill/dataTables.autoFill
+// require datatables/extensions/Buttons/dataTables.buttons
+// require datatables/extensions/Buttons/buttons.html5
+// require datatables/extensions/Buttons/buttons.print
+// require datatables/extensions/Buttons/buttons.colVis
+// require datatables/extensions/Buttons/buttons.flash
+// require datatables/extensions/ColReorder/dataTables.colReorder
+// require datatables/extensions/FixedColumns/dataTables.fixedColumns
+// require datatables/extensions/FixedHeader/dataTables.fixedHeader
+// require datatables/extensions/KeyTable/dataTables.keyTable
+// require datatables/extensions/Responsive/dataTables.responsive
+// require datatables/extensions/RowReorder/dataTables.rowReorder
+// require datatables/extensions/Scroller/dataTables.scroller
+// require datatables/extensions/Select/dataTables.select
+
+//= require datatables/dataTables.material

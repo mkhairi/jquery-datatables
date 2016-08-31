@@ -1,12 +1,14 @@
-*= datatables/dataTables.semanticui.css
-*= datatables/extensions/AutoFill/autoFill.semanticui.css
-*= datatables/extensions/Buttons/buttons.semanticui.css
-*= datatables/extensions/ColReorder/colReorder.semanticui.css
-*= datatables/extensions/FixedColumns/fixedColumns.semanticui.css
-*= datatables/extensions/FixedHeader/fixedHeader.semanticui.css
-*= datatables/extensions/KeyTable/keyTable.semanticui.css
-*= datatables/extensions/Responsive/responsive.semanticui.css
-*= datatables/extensions/RowReorder/rowReorder.semanticui.css
-*= datatables/extensions/RowReorder/semanticui.scss
-*= datatables/extensions/Scroller/scroller.semanticui.css
-*= datatables/extensions/Select/select.semanticui.css
+*= require datatables/dataTables.semanticui
+
+*optional add '=' enable
+* require datatables/extensions/AutoFill/autoFill.semanticui
+* require datatables/extensions/Buttons/buttons.semanticui
+* require datatables/extensions/ColReorder/colReorder.semanticui
+* require datatables/extensions/FixedColumns/fixedColumns.semanticui
+* require datatables/extensions/FixedHeader/fixedHeader.semanticui
+* require datatables/extensions/KeyTable/keyTable.semanticui
+* require datatables/extensions/Responsive/responsive.semanticui
+* require datatables/extensions/RowReorder/rowReorder.semanticui
+* require datatables/extensions/RowReorder/semanticui.scss
+* require datatables/extensions/Scroller/scroller.semanticui
+* require datatables/extensions/Select/select.semanticui

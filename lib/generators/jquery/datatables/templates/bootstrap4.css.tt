@@ -1,11 +1,13 @@
-*= datatables/dataTables.bootstrap4.css
-*= datatables/extensions/AutoFill/autoFill.bootstrap4.css
-*= datatables/extensions/Buttons/buttons.bootstrap4.css
-*= datatables/extensions/ColReorder/colReorder.bootstrap4.css
-*= datatables/extensions/FixedColumns/fixedColumns.bootstrap4.css
-*= datatables/extensions/FixedHeader/fixedHeader.bootstrap4.css
-*= datatables/extensions/KeyTable/keyTable.bootstrap4.css
-*= datatables/extensions/Responsive/responsive.bootstrap4.css
-*= datatables/extensions/RowReorder/rowReorder.bootstrap4.css
-*= datatables/extensions/Scroller/scroller.bootstrap4.css
-*= datatables/extensions/Select/select.bootstrap4.css
+*= require datatables/dataTables.bootstrap4
+
+*optional add '=' enable
+* require datatables/extensions/AutoFill/autoFill.bootstrap4
+* require datatables/extensions/Buttons/buttons.bootstrap4
+* require datatables/extensions/ColReorder/colReorder.bootstrap4
+* require datatables/extensions/FixedColumns/fixedColumns.bootstrap4
+* require datatables/extensions/FixedHeader/fixedHeader.bootstrap4
+* require datatables/extensions/KeyTable/keyTable.bootstrap4
+* require datatables/extensions/Responsive/responsive.bootstrap4
+* require datatables/extensions/RowReorder/rowReorder.bootstrap4
+* require datatables/extensions/Scroller/scroller.bootstrap4
+* require datatables/extensions/Select/select.bootstrap4

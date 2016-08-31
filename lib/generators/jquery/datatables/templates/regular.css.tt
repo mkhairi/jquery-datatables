@@ -1,12 +1,13 @@
-*=require datatables/jquery.dataTables.css
-*=require datatables/jquery.dataTables_themeroller.css
-*=require 'datatables/extensions/AutoFill/autoFill.dataTables.css';
-*=require 'datatables/extensions/Buttons/buttons.dataTables.css';
-*=require 'datatables/extensions/ColReorder/colReorder.dataTables.css';
-*=require 'datatables/extensions/FixedColumns/fixedColumns.dataTables.css';
-*=require 'datatables/extensions/FixedHeader/fixedHeader.dataTables.css';
-*=require 'datatables/extensions/KeyTable/keyTable.dataTables.css';
-*=require 'datatables/extensions/Responsive/responsive.dataTables.css';
-*=require 'datatables/extensions/RowReorder/rowReorder.dataTables.css';
-*=require 'datatables/extensions/Scroller/scroller.dataTables.css';
-*=require 'datatables/extensions/Select/select.dataTables.css';
+*= require datatables/jquery.dataTables
+
+*optional add '=' enable
+* require datatables/extensions/AutoFill/autoFill.dataTables
+* require datatables/extensions/Buttons/buttons.dataTables
+* require datatables/extensions/ColReorder/colReorder.dataTables
+* require datatables/extensions/FixedColumns/fixedColumns.dataTables
+* require datatables/extensions/FixedHeader/fixedHeader.dataTables
+* require datatables/extensions/KeyTable/keyTable.dataTables
+* require datatables/extensions/Responsive/responsive.dataTables
+* require datatables/extensions/RowReorder/rowReorder.dataTables
+* require datatables/extensions/Scroller/scroller.dataTables
+* require datatables/extensions/Select/select.dataTables
