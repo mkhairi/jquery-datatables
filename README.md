@@ -20,7 +20,7 @@ And then execute:
 
     $ bundle install
 
-## Install Generator
+## Install generator
 
 ### command
 ``` 
@@ -36,8 +36,8 @@ rails g jquery:datatables:install bootstrap
 ```
 
 this generator will: 
-  -  1. add ```//= require datatables ```
-  -  2. add ```*= require datatables ```
+  -  1. append ```//= require datatables ``` add `app/assets/javascripts/application.js`
+  -  2. append ```*= require datatables ``` add `app/assets/stylesheets/application.css`
   -  3. create datatable.js  in ```app/assets/javasrcipts/```
   -  4. create datatable.css in  ```app/assets/stylesheets/```
 
