@@ -1,4 +1,7 @@
+/*
 *= require datatables/dataTables.foundation
+*
+*optional add '=' enable
 * require datatables/extensions/AutoFill/autoFill.foundation
 * require datatables/extensions/Buttons/buttons.foundation
 * require datatables/extensions/ColReorder/colReorder.foundation
@@ -9,3 +12,4 @@
 * require datatables/extensions/RowReorder/rowReorder.foundation
 * require datatables/extensions/Scroller/scroller.foundation
 * require datatables/extensions/Select/select.foundation
+*/

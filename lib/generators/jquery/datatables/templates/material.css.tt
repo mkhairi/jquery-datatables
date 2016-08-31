@@ -1,5 +1,6 @@
+/*
 *= datatables/dataTables.material.css
-
+*
 *optional add '=' enable
 * require datatables/extensions/AutoFill/autoFill.dataTables
 * require datatables/extensions/Buttons/buttons.dataTables
@@ -11,3 +12,4 @@
 * require datatables/extensions/RowReorder/rowReorder.dataTables
 * require datatables/extensions/Scroller/scroller.dataTables
 * require datatables/extensions/Select/select.dataTables
+*/

@@ -1,5 +1,6 @@
+/*
 *= require datatables/dataTables.bootstrap
-
+*
 *optional add '=' enable
 * require datatables/extensions/AutoFill/autoFill.bootstrap
 * require datatables/extensions/Buttons/buttons.bootstrap
@@ -11,3 +12,4 @@
 * require datatables/extensions/RowReorder/rowReorder.bootstrap
 * require datatables/extensions/Scroller/scroller.bootstrap
 * require datatables/extensions/Select/select.bootstrap
+*/

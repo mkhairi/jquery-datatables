@@ -1,5 +1,6 @@
+/*
 *= require datatables/dataTables.semanticui
-
+*
 *optional add '=' enable
 * require datatables/extensions/AutoFill/autoFill.semanticui
 * require datatables/extensions/Buttons/buttons.semanticui
@@ -12,3 +13,4 @@
 * require datatables/extensions/RowReorder/semanticui.scss
 * require datatables/extensions/Scroller/scroller.semanticui
 * require datatables/extensions/Select/select.semanticui
+*/
