@@ -79,15 +79,19 @@ create new file `app/assets/stylesheets/datatables.css`
 <br>
 ** default theme
 ```
+/*
 *= require datatables/jquery.dataTables
 *= require datatables/extensions/Responsive/responsive.datatables
 *= require datatables/extensions/Buttons/buttons.dataTables
+*/
 ```
 ** if using boostrap theme
 ```
+/*
 *= require datatables/dataTables.bootstrap4
 *= require datatables/extensions/Responsive/responsive.bootstrap4
 *= require datatables/extensions/Buttons/buttons.bootstrap4
+*/
 
 ```
 *** you may refer other extensions in this directory: [click me](https://github.com/mkhairi/jquery-datatables/tree/master/app/assets/stylesheets/datatables/extensions)
