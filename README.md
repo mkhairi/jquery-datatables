@@ -23,11 +23,17 @@ And then execute:
 ## Install Generator
 
 ### command
-``` rails g jquery:datatables:install ```
+``` 
+rails g jquery:datatables:install 
+
+```
 
 or if you using bootstrap
 
-``` rails g jquery:datatables:install bootstrap ```
+``` 
+rails g jquery:datatables:install bootstrap 
+
+```
 
 this generator will: 
   -  1. add ```//= require datatables ```
