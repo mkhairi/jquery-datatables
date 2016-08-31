@@ -47,15 +47,50 @@ this generator will:
 
 Include the JavaScript in your `app/assets/javascripts/application.js`:
 ```
-     //= require jquery
-     //= require datatables
+ //= require jquery
+ //= require datatables
 ```
+create new file `app/assets/javascripts/datatables.js`
+```
+//Core component
+//= require datatables/jquery.dataTables
+//Bootstrap4 theme
+//= require datatables/dataTables.bootstrap4
+
+//Optional Datatables extensions
+//= require datatables/extensions/Responsive/dataTables.responsive
+//= require datatables/extensions/Responsive/responsive.bootstrap4
+//= require datatables/extensions/Buttons/dataTables.buttons
+//= require datatables/extensions/Buttons/buttons.html5
+//= require datatables/extensions/Buttons/buttons.print
+//= require datatables/extensions/Buttons/buttons.bootstrap4
+
+```
+*** you may refer other extensions in this directory: [click me](https://github.com/mkhairi/jquery-datatables/tree/master/app/assets/javascripts/datatables/extensions)
 
 ### Stylesheets
 Include the stylesheet in your `app/assets/stylesheets/application.css`:
 ```
-    *= require datatables
+*= require datatables
 ```
+
+create new file `app/assets/stylesheets/datatables.css`
+<br>
+** default theme
+```
+*= require datatables/jquery.dataTables
+*= require datatables/extensions/Responsive/responsive.datatables
+*= require datatables/extensions/Buttons/buttons.dataTables
+```
+** if using boostrap theme
+```
+*= require datatables/dataTables.bootstrap4
+*= require datatables/extensions/Responsive/responsive.bootstrap4
+*= require datatables/extensions/Buttons/buttons.bootstrap4
+
+```
+*** you may refer other extensions in this directory: [click me](https://github.com/mkhairi/jquery-datatables/tree/master/app/assets/stylesheets/datatables/extensions)
+
 ### Initialization
 
 Where needed in your JavaScripts, initialize your DataTables:
