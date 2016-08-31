@@ -47,8 +47,9 @@ this generator will:
 
 Include the JavaScript in your `app/assets/javascripts/application.js`:
 ```
- //= require jquery
- //= require datatables
+//= require jquery
+//= require datatables
+
 ```
 create new file `app/assets/javascripts/datatables.js`
 ```
@@ -100,6 +101,10 @@ $(document).ready(function() {
   $("#dttb").dataTable();
 });
 ```
+
+## Todo
+ - add plugins
+ - update instructions
 
 ## Contributing
 
