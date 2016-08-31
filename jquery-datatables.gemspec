@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.authors       = ["mkhairi"]
   spec.email         = ["mkhairi@labs.my"]
   spec.summary       = %q{Jquery DataTables web assets for Rails, etc.}
-  spec.description   = %q{Jquery DataTables web assets for Rails, etc.}
+  spec.description   = %q{Include jQuery DataTables in asset pipeline with ease}
   spec.homepage      = "https://github.com/mkhairi/jquery-datatables"
   spec.license       = "MIT"
 
@@ -18,11 +18,10 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
   
-  spec.add_dependency "sass-rails"
-  spec.add_development_dependency 'actionpack', '>= 4.1.5'
-  spec.add_development_dependency 'activesupport', '>= 4.1.5'
-  spec.add_development_dependency 'sprockets-rails', '>= 2.3.2'
-  spec.add_development_dependency 'jquery-rails', '>= 3.1.0'
+  spec.add_development_dependency 'actionpack', '~> 4.1'
+  spec.add_development_dependency 'activesupport', '~> 4.1'
+  spec.add_development_dependency 'sprockets-rails', '~> 2.3'
+  spec.add_development_dependency 'jquery-rails', '~> 3.1'
   spec.add_development_dependency "bundler", "~> 1.7"
   spec.add_development_dependency "rake", "~> 10.0"
 end
