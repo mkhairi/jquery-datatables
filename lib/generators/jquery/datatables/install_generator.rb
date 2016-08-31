@@ -40,7 +40,7 @@ module Jquery
 
         def insert_scss_strings(scss_manifest)
           content = File.read(scss_manifest)
-          scss_strings = "@import \"datatables\";\n"
+          scss_strings = "\n@import \"datatables\";\n"
           append_to_file scss_manifest, scss_strings
         end
 
