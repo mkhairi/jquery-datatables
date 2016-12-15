@@ -1,15 +1,15 @@
-/*! AutoFill 2.1.2
- * ©2008-2015 SpryMedia Ltd - datatables.net/license
+/*! AutoFill 2.1.3
+ * ©2008-2016 SpryMedia Ltd - datatables.net/license
  */
 
 /**
  * @summary     AutoFill
  * @description Add Excel like click and drag auto-fill options to DataTables
- * @version     2.1.2
+ * @version     2.1.3
  * @file        dataTables.autoFill.js
  * @author      SpryMedia Ltd (www.sprymedia.co.uk)
  * @contact     www.sprymedia.co.uk/contact
- * @copyright   Copyright 2010-2015 SpryMedia Ltd.
+ * @copyright   Copyright 2010-2016 SpryMedia Ltd.
  *
  * This source file is free software, available under the following license:
  *   MIT license - http://datatables.net/license/mit
@@ -192,8 +192,6 @@ $.extend( AutoFill.prototype, {
 		var idx = dt.cell( node ).index();
 		var handle = this.dom.handle;
 		var handleDim = this.s.handle;
-		var dtScroll = $('div.dataTables_scrollBody', this.s.dt.table().container() );
-		var scrollOffsetX=0, scrollOffsetY=0;
 
 		if ( ! idx || dt.columns( this.c.columns ).indexes().indexOf( idx.column ) === -1 ) {
 			this._detach();
@@ -201,7 +199,8 @@ $.extend( AutoFill.prototype, {
 		}
 
 		if ( ! this.dom.offsetParent ) {
-			this.dom.offsetParent = $(node).offsetParent();
+			// We attach to the table's offset parent
+			this.dom.offsetParent = $( dt.table().node() ).offsetParent();
 		}
 
 		if ( ! handleDim.height || ! handleDim.width ) {
@@ -212,20 +211,14 @@ $.extend( AutoFill.prototype, {
 			handleDim.width = handle.outerWidth();
 		}
 
-		var offset = $(node).position();
-
-		// If scrolling, and the table is not itself the offset parent, need to
-		// offset for the scrolling position
-		if ( dtScroll.length && this.dom.offsetParent[0] !== dt.table().node() ) {
-			scrollOffsetY = dtScroll.scrollTop();
-			scrollOffsetX = dtScroll.scrollLeft();
-		}
+		// Might need to go through multiple offset parents
+		var offset = this._getPosition( node, this.dom.offsetParent );
 
 		this.dom.attachedTo = node;
 		handle
 			.css( {
-				top: offset.top + node.offsetHeight - handleDim.height + scrollOffsetY,
-				left: offset.left + node.offsetWidth - handleDim.width + scrollOffsetX
+				top: offset.top + node.offsetHeight - handleDim.height,
+				left: offset.left + node.offsetWidth - handleDim.width
 			} )
 			.appendTo( this.dom.offsetParent );
 	},
@@ -327,6 +320,7 @@ $.extend( AutoFill.prototype, {
 			row: dt.rows( { page: 'current' } ).nodes().indexOf( endCell.parent()[0] ),
 			column: endCell.index()
 		};
+		var colIndx = dt.column.index( 'toData', end.column );
 
 		// Be sure that is a DataTables controlled cell
 		if ( ! dt.cell( endCell ).any() ) {
@@ -334,7 +328,7 @@ $.extend( AutoFill.prototype, {
 		}
 
 		// if target is not in the columns available - do nothing
-		if ( dt.columns( this.c.columns ).indexes().indexOf( end.column ) === -1 ) {
+		if ( dt.columns( this.c.columns ).indexes().indexOf( colIndx ) === -1 ) {
 			return;
 		}
 
@@ -347,16 +341,10 @@ $.extend( AutoFill.prototype, {
 		left   = start.column < end.column ? startCell : endCell;
 		right  = start.column < end.column ? endCell   : startCell;
 
-		top    = top.position().top;
-		left   = left.position().left;
-		height = bottom.position().top + bottom.outerHeight() - top;
-		width  = right.position().left + right.outerWidth() - left;
-
-		var dtScroll = this.dom.dtScroll;
-		if ( dtScroll && this.dom.offsetParent[0] !== dt.table().node() ) {
-			top += dtScroll.scrollTop();
-			left += dtScroll.scrollLeft();
-		}
+		top    = this._getPosition( top ).top;
+		left   = this._getPosition( left ).left;
+		height = this._getPosition( bottom ).top + bottom.outerHeight() - top;
+		width  = this._getPosition( right ).left + right.outerWidth() - left;
 
 		var select = this.dom.select;
 		select.top.css( {
@@ -486,7 +474,7 @@ $.extend( AutoFill.prototype, {
 		var namespace = this.s.namespace;
 		var focus = this.c.focus !== null ?
 			this.c.focus :
-			dt.settings()[0].keytable ?
+			dt.init().keys || dt.settings()[0].keytable ?
 				'focus' :
 				'hover';
 
@@ -529,6 +517,50 @@ $.extend( AutoFill.prototype, {
 
 
 	/**
+	 * Get the position of a node, relative to another, including any scrolling
+	 * offsets.
+	 * @param  {Node}   node         Node to get the position of
+	 * @param  {jQuery} targetParent Node to use as the parent
+	 * @return {object}              Offset calculation
+	 * @private
+	 */
+	_getPosition: function ( node, targetParent )
+	{
+		var
+			currNode = $(node),
+			currOffsetParent,
+			position,
+			top = 0,
+			left = 0;
+
+		if ( ! targetParent ) {
+			targetParent = $( this.s.dt.table().node() ).offsetParent();
+		}
+
+		do {
+			position = currNode.position();
+			currOffsetParent = currNode.offsetParent();
+
+			top += position.top + currOffsetParent.scrollTop();
+			left += position.left + currOffsetParent.scrollLeft();
+
+			// Emergency fall back. Shouldn't happen, but just in case!
+			if ( currNode.get(0).nodeName.toLowerCase() === 'body' ) {
+				break;
+			}
+
+			currNode = currOffsetParent; // for next loop
+		}
+		while ( currOffsetParent.get(0) !== targetParent.get(0) )
+
+		return {
+			top: top,
+			left: left
+		};
+	},
+
+
+	/**
 	 * Start mouse drag - selects the start cell
 	 *
 	 * @param  {object} e Mouse down event
@@ -554,7 +586,7 @@ $.extend( AutoFill.prototype, {
 			} );
 
 		var select = this.dom.select;
-		var offsetParent = $(this.s.dt.table().body()).offsetParent();
+		var offsetParent = $( dt.table().node() ).offsetParent();
 		select.top.appendTo( offsetParent );
 		select.left.appendTo( offsetParent );
 		select.right.appendTo( offsetParent );
@@ -970,7 +1002,7 @@ AutoFill.actions = {
  * @static
  * @type      String
  */
-AutoFill.version = '2.1.2';
+AutoFill.version = '2.1.3';
 
 
 /**
