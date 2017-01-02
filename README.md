@@ -107,7 +107,6 @@ $(document).ready(function() {
 ```
 
 ## Todo
- - add plugins
  - update instructions
 
 ## Contributing
