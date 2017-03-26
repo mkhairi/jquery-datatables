@@ -1,7 +1,7 @@
 # jquery-datatables [![Gem Version](https://badge.fury.io/rb/jquery-datatables.svg)](http://badge.fury.io/rb/jquery-datatables)
 Jquery datatables assets pipeline :: sprockets
 
-Include [jQuery DataTables](http://www.datatables.net/) in your asset pipeline with ease using [jqury-datatables](https://rubygems.org/gems/jqury-datatables) gem.
+Include [jQuery DataTables](http://www.datatables.net/) in your asset pipeline with ease using [jquery-datatables](https://rubygems.org/gems/jquery-datatables) gem.
 
 ## Gem Installation
 
@@ -38,7 +38,7 @@ rails g jquery:datatables:install bootstrap
 this generator will: 
   -  1. append ```//= require datatables ``` add `app/assets/javascripts/application.js`
   -  2. append ```*= require datatables ``` add `app/assets/stylesheets/application.css`
-  -  3. create datatable.js  in ```app/assets/javasrcipts/```
+  -  3. create datatable.js  in ```app/assets/javascripts/```
   -  4. create datatable.css in  ```app/assets/stylesheets/```
 
 ## Manual install
