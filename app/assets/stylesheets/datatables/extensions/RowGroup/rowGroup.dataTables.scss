@@ -1,0 +1,9 @@
+
+
+$table-rowgroup-background: #e0e0e0 !default;
+
+table.dataTable tr.group td {
+	font-weight: bold;
+	background-color: $table-rowgroup-background;
+}
+

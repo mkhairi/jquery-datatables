@@ -1,7 +1,7 @@
 require "bundler/gem_tasks"
 
 datatables_dir = "DataTablesSrc" 
-extensions = %w(AutoFill Buttons ColReorder FixedColumns FixedHeader KeyTable Responsive RowReorder Scroller Select)
+extensions = %w(AutoFill Buttons ColReorder FixedColumns FixedHeader KeyTable Responsive RowReorder Scroller Select RowGroup)
 frameworks = %w(regular bootstrap bootstrap4 foundation jqueryui material semanticui uikit)
 
 namespace :images do
