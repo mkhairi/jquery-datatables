@@ -68,7 +68,7 @@ var RowGroup = function ( dt, opts ) {
 	this.s = {
 		dt: new DataTable.Api( dt ),
 
-		dataFn: DataTable.ext.oApi._fnGetObjectDataFn( this.c.dataSrc )
+		dataFn: DataTable.ext.oApi._fnGetObjectDataFn( this.c.dataSrc ),
 	};
 
 	// DOM items

@@ -1,11 +1,11 @@
-/*! KeyTable 2.2.0
+/*! KeyTable 2.2.1
  * ©2009-2016 SpryMedia Ltd - datatables.net/license
  */
 
 /**
  * @summary     KeyTable
  * @description Spreadsheet like keyboard navigation for DataTables
- * @version     2.2.0
+ * @version     2.2.1
  * @file        dataTables.keyTable.js
  * @author      SpryMedia Ltd (www.sprymedia.co.uk)
  * @contact     www.sprymedia.co.uk/contact
@@ -211,6 +211,11 @@ $.extend( KeyTable.prototype, {
 					return;
 				}
 
+				// Or an Editor date input
+				if ( $(e.target).parents('div.editor-datetime').length ) {
+					return;
+				}
+
 				//If the click was inside the fixed columns container, don't blur
 				if ( $(e.target).parents().filter('.DTFC_Cloned').length ) {
 					return;
@@ -243,10 +248,14 @@ $.extend( KeyTable.prototype, {
 
 			var lastFocus = that.s.lastFocus;
 
-			if ( lastFocus ) {
+			if ( lastFocus && lastFocus.node && $(lastFocus.node).closest('body') === document.body ) {
 				var relative = that.s.lastFocus.relative;
 				var info = dt.page.info();
 				var row = relative.row + info.start;
+
+				if ( info.recordsDisplay === 0 ) {
+					return;
+				}
 
 				// Reverse if needed
 				if ( row >= info.recordsDisplay ) {
@@ -345,6 +354,7 @@ $.extend( KeyTable.prototype, {
 	 */
 	_editor: function ( key, orig )
 	{
+		var that = this;
 		var dt = this.s.dt;
 		var editor = this.c.editor;
 
@@ -361,26 +371,36 @@ $.extend( KeyTable.prototype, {
 			orig.preventDefault();
 		}
 
-		editor.inline( this.s.lastFocus.cell.index() );
+		editor
+			.one( 'open.keyTable', function () {
+				// Remove cancel open
+				editor.off( 'cancelOpen.keyTable' );
 
-		// Excel style - select all text
-		$('div.DTE input, div.DTE textarea').select();
+				// Excel style - select all text
+				$('div.DTE input, div.DTE textarea').select();
 
-		// Reduce the keys the Keys listens for
-		dt.keys.enable( this.c.editorKeys );
+				// Reduce the keys the Keys listens for
+				dt.keys.enable( that.c.editorKeys );
 
-		// On blur of the navigation submit
-		dt.one( 'key-blur.editor', function () {
-			if ( editor.displayed() ) {
-				editor.submit();
-			}
-		} );
+				// On blur of the navigation submit
+				dt.one( 'key-blur.editor', function () {
+					if ( editor.displayed() ) {
+						editor.submit();
+					}
+				} );
 
-		// Restore full key navigation on close
-		editor.one( 'close', function () {
-			dt.keys.enable( true );
-			dt.off( 'key-blur.editor' );
-		} );
+				// Restore full key navigation on close
+				editor.one( 'close', function () {
+					dt.keys.enable( true );
+					dt.off( 'key-blur.editor' );
+				} );
+			} )
+			.one( 'cancelOpen.keyTable', function () {
+				// `preOpen` can cancel the display of the form, so it
+				// might be that the open event handler isn't needed
+				editor.off( 'open.keyTable' );
+			} )
+			.inline( this.s.lastFocus.cell.index() );
 	},
 
 
@@ -417,8 +437,10 @@ $.extend( KeyTable.prototype, {
 		var dt = this.s.dt;
 		var pageInfo = dt.page.info();
 		var lastFocus = this.s.lastFocus;
-		if( ! originalEvent)
+
+		if ( ! originalEvent) {
 			originalEvent = null;
+		}
 
 		if ( ! this.s.enable ) {
 			return;
@@ -451,7 +473,7 @@ $.extend( KeyTable.prototype, {
 				.one( 'draw', function () {
 					that.s.focusDraw = false;
 					that.s.waitingForDraw = false;
-					that._focus( row, column );
+					that._focus( row, column, undefined, originalEvent );
 				} )
 				.page( Math.floor( row / pageInfo.length ) )
 				.draw( false );
@@ -782,26 +804,32 @@ $.extend( KeyTable.prototype, {
 			.insertBefore( dt.table().node() );
 
 		div.children().on( 'focus', function (e) {
-			that._focus( dt.cell(':eq(0)', '0:visible', {page: 'current'}), null, true, e );
+			if ( dt.cell(':eq(0)', {page: 'current'}).any() ) {
+				that._focus( dt.cell(':eq(0)', '0:visible', {page: 'current'}), null, true, e );
+			}
 		} );
 	},
+
 	/**
-	 * Update fixed columns if they are enabled and if the cell we are focusing is inside a  fixed column
-	 * @param  {integer}  column           Index of the column being changed
-	 *
+	 * Update fixed columns if they are enabled and if the cell we are
+	 * focusing is inside a fixed column
+	 * @param  {integer} column Index of the column being changed
 	 * @private
 	 */
-	 _updateFixedColumns:function(column){
-	 	var dt = this.s.dt;
-	 	var settings = dt.settings()[0];
+	_updateFixedColumns: function( column )
+	{
+		var dt = this.s.dt;
+		var settings = dt.settings()[0];
 
-	 	if(settings._oFixedColumns){
-	 		var leftCols = settings._oFixedColumns.s.iLeftColumns;
-	 		var rightCols = settings.aoColumns.length - settings._oFixedColumns.s.iRightColumns;
-	 		if (column < leftCols || column > rightCols)
-	 			dt.fixedColumns().update();
-	 	}
-	 }
+		if ( settings._oFixedColumns ) {
+			var leftCols = settings._oFixedColumns.s.iLeftColumns;
+			var rightCols = settings.aoColumns.length - settings._oFixedColumns.s.iRightColumns;
+
+			if (column < leftCols || column >= rightCols) {
+				dt.fixedColumns().update();
+			}
+		}
+	}
 } );
 
 
@@ -867,7 +895,7 @@ KeyTable.defaults = {
 
 
 
-KeyTable.version = "2.2.0";
+KeyTable.version = "2.2.1";
 
 
 $.fn.dataTable.KeyTable = KeyTable;

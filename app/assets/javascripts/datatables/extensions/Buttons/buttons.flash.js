@@ -752,7 +752,10 @@ function _excelColWidth( data, col ) {
 	}
 
 	for ( var i=0, ien=data.body.length ; i<ien ; i++ ) {
-		str = data.body[i][col].toString();
+		var point = data.body[i][col];
+		str = point !== null && point !== undefined ?
+			point.toString() :
+			'';
 
 		// If there is a newline character, workout the width of the column
 		// based on the longest line in the string
@@ -774,7 +777,7 @@ function _excelColWidth( data, col ) {
 
 		// Max width rather than having potentially massive column widths
 		if ( max > 40 ) {
-			break;
+			return 52; // 40 * 1.3
 		}
 	}
 
@@ -784,11 +787,19 @@ function _excelColWidth( data, col ) {
 	return max > 6 ? max : 6;
 }
 
-try {
-	var _serialiser = new XMLSerializer();
-	var _ieExcel;
-}
-catch (t) {}
+  var _serialiser = "";
+    if (typeof window.XMLSerializer === 'undefined') {
+        _serialiser = new function () {
+            this.serializeToString = function (input) {
+                return input.xml
+            }
+        };
+    } else {
+        _serialiser =  new XMLSerializer();
+    }
+
+    var _ieExcel;
+
 
 /**
  * Convert XML documents in an object to strings
@@ -853,7 +864,7 @@ function _xlsxToStrings( obj ) {
 
 			// Safari, IE and Edge will put empty name space attributes onto
 			// various elements making them useless. This strips them out
-			str = str.replace( /<(.*?) xmlns=""(.*?)>/g, '<$1 $2>' );
+			str = str.replace( /<([^<>]*?) xmlns=""([^<>]*?)>/g, '<$1 $2>' );
 
 			obj[ name ] = str;
 		}
@@ -1010,11 +1021,11 @@ var excelStrings = {
 				'<xf numFmtId="0" fontId="2" fillId="2" borderId="0" applyFont="1" applyFill="1" applyBorder="1"/>'+
 				'<xf numFmtId="0" fontId="3" fillId="2" borderId="0" applyFont="1" applyFill="1" applyBorder="1"/>'+
 				'<xf numFmtId="0" fontId="4" fillId="2" borderId="0" applyFont="1" applyFill="1" applyBorder="1"/>'+
-				'<xf numFmtId="0" fontId="0" fillId="4" borderId="0" applyFont="1" applyFill="1" applyBorder="1"/>'+
-				'<xf numFmtId="0" fontId="1" fillId="4" borderId="0" applyFont="1" applyFill="1" applyBorder="1"/>'+
-				'<xf numFmtId="0" fontId="2" fillId="4" borderId="0" applyFont="1" applyFill="1" applyBorder="1"/>'+
-				'<xf numFmtId="0" fontId="3" fillId="4" borderId="0" applyFont="1" applyFill="1" applyBorder="1"/>'+
-				'<xf numFmtId="0" fontId="4" fillId="4" borderId="0" applyFont="1" applyFill="1" applyBorder="1"/>'+
+				'<xf numFmtId="0" fontId="0" fillId="3" borderId="0" applyFont="1" applyFill="1" applyBorder="1"/>'+
+				'<xf numFmtId="0" fontId="1" fillId="3" borderId="0" applyFont="1" applyFill="1" applyBorder="1"/>'+
+				'<xf numFmtId="0" fontId="2" fillId="3" borderId="0" applyFont="1" applyFill="1" applyBorder="1"/>'+
+				'<xf numFmtId="0" fontId="3" fillId="3" borderId="0" applyFont="1" applyFill="1" applyBorder="1"/>'+
+				'<xf numFmtId="0" fontId="4" fillId="3" borderId="0" applyFont="1" applyFill="1" applyBorder="1"/>'+
 				'<xf numFmtId="0" fontId="0" fillId="4" borderId="0" applyFont="1" applyFill="1" applyBorder="1"/>'+
 				'<xf numFmtId="0" fontId="1" fillId="4" borderId="0" applyFont="1" applyFill="1" applyBorder="1"/>'+
 				'<xf numFmtId="0" fontId="2" fillId="4" borderId="0" applyFont="1" applyFill="1" applyBorder="1"/>'+
@@ -1109,7 +1120,7 @@ var _excelSpecials = [
  */
 
 // Set the default SWF path
-DataTable.Buttons.swfPath = '//cdn.datatables.net/buttons/1.2.0/swf/flashExport.swf';
+DataTable.Buttons.swfPath = '//cdn.datatables.net/buttons/1.2.4/swf/flashExport.swf';
 
 // Method to allow Flash buttons to be resized when made visible - as they are
 // of zero height and width if initialised hidden
@@ -1140,6 +1151,8 @@ DataTable.ext.buttons.copyFlash = $.extend( {}, flashButton, {
 			return;
 		}
 
+		this.processing( true );
+
 		var flash = config._flash;
 		var data = _exportData( dt, config );
 		var output = config.customize ?
@@ -1148,6 +1161,8 @@ DataTable.ext.buttons.copyFlash = $.extend( {}, flashButton, {
 
 		flash.setAction( 'copy' );
 		_setText( flash, output );
+
+		this.processing( false );
 
 		dt.buttons.info(
 			dt.i18n( 'buttons.copyTitle', 'Copy to clipboard' ),
@@ -1197,6 +1212,8 @@ DataTable.ext.buttons.excelFlash = $.extend( {}, flashButton, {
 	},
 
 	action: function ( e, dt, button, config ) {
+		this.processing( true );
+
 		var flash = config._flash;
 		var rowPos = 0;
 		var rels = $.parseXML( excelStrings['xl/worksheets/sheet1.xml'] ) ; //Parses xml
@@ -1242,7 +1259,10 @@ DataTable.ext.buttons.excelFlash = $.extend( {}, flashButton, {
 				for ( var j=0, jen=_excelSpecials.length ; j<jen ; j++ ) {
 					var special = _excelSpecials[j];
 
-					if ( row[i].match && row[i].match( special.match ) ) {
+					// TODO Need to provide the ability for the specials to say
+					// if they are returning a string, since at the moment it is
+					// assumed to be a number
+					if ( row[i].match && ! row[i].match(/^0\d+/) && row[i].match( special.match ) ) {
 						var val = row[i].replace(/[^\d\.\-]/g, '');
 
 						if ( special.fmt ) {
@@ -1358,6 +1378,8 @@ DataTable.ext.buttons.excelFlash = $.extend( {}, flashButton, {
 		flash.setFileName( _filename( config ) );
 		flash.setSheetData( xlsx );
 		_setText( flash, '' );
+
+		this.processing( false );
 	},
 
 	extension: '.xlsx'
@@ -1374,6 +1396,8 @@ DataTable.ext.buttons.pdfFlash = $.extend( {}, flashButton, {
 	},
 
 	action: function ( e, dt, button, config ) {
+		this.processing( true );
+
 		// Set the text
 		var flash = config._flash;
 		var data = dt.buttons.exportData( config.exportOptions );
@@ -1397,6 +1421,8 @@ DataTable.ext.buttons.pdfFlash = $.extend( {}, flashButton, {
 			footer:      config.footer ? data.footer : null,
 			body:        data.body
 		} ) );
+
+		this.processing( false );
 	},
 
 	extension: '.pdf',

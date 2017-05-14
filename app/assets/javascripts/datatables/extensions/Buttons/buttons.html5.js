@@ -473,7 +473,7 @@ function _addToZip( zip, obj ) {
 
 			// Safari, IE and Edge will put empty name space attributes onto
 			// various elements making them useless. This strips them out
-			str = str.replace( /<(.*?) xmlns=""(.*?)>/g, '<$1 $2>' );
+			str = str.replace( /<([^<>]*?) xmlns=""([^<>]*?)>/g, '<$1 $2>' );
 
 			zip.file( name, str );
 		}
@@ -527,7 +527,10 @@ function _excelColWidth( data, col ) {
 	}
 
 	for ( var i=0, ien=data.body.length ; i<ien ; i++ ) {
-		str = data.body[i][col].toString();
+		var point = data.body[i][col];
+		str = point !== null && point !== undefined ?
+			point.toString() :
+			'';
 
 		// If there is a newline character, workout the width of the column
 		// based on the longest line in the string
@@ -549,7 +552,7 @@ function _excelColWidth( data, col ) {
 
 		// Max width rather than having potentially massive column widths
 		if ( max > 40 ) {
-			break;
+			return 52; // 40 * 1.3
 		}
 	}
 
@@ -698,7 +701,7 @@ var excelStrings = {
 			'<cellStyleXfs count="1">'+
 				'<xf numFmtId="0" fontId="0" fillId="0" borderId="0" />'+
 			'</cellStyleXfs>'+
-			'<cellXfs count="65">'+
+			'<cellXfs count="67">'+
 				'<xf numFmtId="0" fontId="0" fillId="0" borderId="0" applyFont="1" applyFill="1" applyBorder="1"/>'+
 				'<xf numFmtId="0" fontId="1" fillId="0" borderId="0" applyFont="1" applyFill="1" applyBorder="1"/>'+
 				'<xf numFmtId="0" fontId="2" fillId="0" borderId="0" applyFont="1" applyFill="1" applyBorder="1"/>'+
@@ -709,11 +712,11 @@ var excelStrings = {
 				'<xf numFmtId="0" fontId="2" fillId="2" borderId="0" applyFont="1" applyFill="1" applyBorder="1"/>'+
 				'<xf numFmtId="0" fontId="3" fillId="2" borderId="0" applyFont="1" applyFill="1" applyBorder="1"/>'+
 				'<xf numFmtId="0" fontId="4" fillId="2" borderId="0" applyFont="1" applyFill="1" applyBorder="1"/>'+
-				'<xf numFmtId="0" fontId="0" fillId="4" borderId="0" applyFont="1" applyFill="1" applyBorder="1"/>'+
-				'<xf numFmtId="0" fontId="1" fillId="4" borderId="0" applyFont="1" applyFill="1" applyBorder="1"/>'+
-				'<xf numFmtId="0" fontId="2" fillId="4" borderId="0" applyFont="1" applyFill="1" applyBorder="1"/>'+
-				'<xf numFmtId="0" fontId="3" fillId="4" borderId="0" applyFont="1" applyFill="1" applyBorder="1"/>'+
-				'<xf numFmtId="0" fontId="4" fillId="4" borderId="0" applyFont="1" applyFill="1" applyBorder="1"/>'+
+				'<xf numFmtId="0" fontId="0" fillId="3" borderId="0" applyFont="1" applyFill="1" applyBorder="1"/>'+
+				'<xf numFmtId="0" fontId="1" fillId="3" borderId="0" applyFont="1" applyFill="1" applyBorder="1"/>'+
+				'<xf numFmtId="0" fontId="2" fillId="3" borderId="0" applyFont="1" applyFill="1" applyBorder="1"/>'+
+				'<xf numFmtId="0" fontId="3" fillId="3" borderId="0" applyFont="1" applyFill="1" applyBorder="1"/>'+
+				'<xf numFmtId="0" fontId="4" fillId="3" borderId="0" applyFont="1" applyFill="1" applyBorder="1"/>'+
 				'<xf numFmtId="0" fontId="0" fillId="4" borderId="0" applyFont="1" applyFill="1" applyBorder="1"/>'+
 				'<xf numFmtId="0" fontId="1" fillId="4" borderId="0" applyFont="1" applyFill="1" applyBorder="1"/>'+
 				'<xf numFmtId="0" fontId="2" fillId="4" borderId="0" applyFont="1" applyFill="1" applyBorder="1"/>'+
@@ -776,6 +779,8 @@ var excelStrings = {
 				'<xf numFmtId="169" fontId="0" fillId="0" borderId="0" applyFont="1" applyFill="1" applyBorder="1" xfId="0" applyNumberFormat="1"/>'+
 				'<xf numFmtId="3" fontId="0" fillId="0" borderId="0" applyFont="1" applyFill="1" applyBorder="1" xfId="0" applyNumberFormat="1"/>'+
 				'<xf numFmtId="4" fontId="0" fillId="0" borderId="0" applyFont="1" applyFill="1" applyBorder="1" xfId="0" applyNumberFormat="1"/>'+
+				'<xf numFmtId="1" fontId="0" fillId="0" borderId="0" applyFont="1" applyFill="1" applyBorder="1" xfId="0" applyNumberFormat="1"/>'+
+				'<xf numFmtId="2" fontId="0" fillId="0" borderId="0" applyFont="1" applyFill="1" applyBorder="1" xfId="0" applyNumberFormat="1"/>'+
 			'</cellXfs>'+
 			'<cellStyles count="1">'+
 				'<cellStyle name="Normal" xfId="0" builtinId="0" />'+
@@ -797,10 +802,12 @@ var _excelSpecials = [
 	{ match: /^\-?\$[\d,]+.?\d*$/,  style: 57 }, // Dollars
 	{ match: /^\-?£[\d,]+.?\d*$/,   style: 58 }, // Pounds
 	{ match: /^\-?€[\d,]+.?\d*$/,   style: 59 }, // Euros
+	{ match: /^\-?\d+$/,            style: 65 }, // Numbers without thousand separators
+	{ match: /^\-?\d+\.\d{2}$/,     style: 66 }, // Numbers 2 d.p. without thousands separators
 	{ match: /^\([\d,]+\)$/,        style: 61, fmt: function (d) { return -1 * d.replace(/[\(\)]/g, ''); } },  // Negative numbers indicated by brackets
 	{ match: /^\([\d,]+\.\d{2}\)$/, style: 62, fmt: function (d) { return -1 * d.replace(/[\(\)]/g, ''); } },  // Negative numbers indicated by brackets - 2d.p.
-	{ match: /^[\d,]+$/,            style: 63 }, // Numbers with thousand separators
-	{ match: /^[\d,]+\.\d{2}$/,     style: 64 }  // Numbers with 2d.p. and thousands separators
+	{ match: /^\-?[\d,]+$/,         style: 63 }, // Numbers with thousand separators
+	{ match: /^\-?[\d,]+\.\d{2}$/,  style: 64 }  // Numbers with 2 d.p. and thousands separators
 ];
 
 
@@ -820,6 +827,9 @@ DataTable.ext.buttons.copyHtml5 = {
 	},
 
 	action: function ( e, dt, button, config ) {
+		this.processing( true );
+
+		var that = this;
 		var exportData = _exportData( dt, config );
 		var output = exportData.str;
 		var hiddenDiv = $('<div/>')
@@ -859,6 +869,8 @@ DataTable.ext.buttons.copyHtml5 = {
 						}, exportData.rows ),
 						2000
 					);
+
+					this.processing( false );
 					return;
 				}
 			}
@@ -892,10 +904,12 @@ DataTable.ext.buttons.copyHtml5 = {
 			.on( 'keydown.buttons-copy', function (e) {
 				if ( e.keyCode === 27 ) { // esc
 					close();
+					that.processing( false );
 				}
 			} )
 			.on( 'copy.buttons-copy cut.buttons-copy', function () {
 				close();
+				that.processing( false );
 			} );
 	},
 
@@ -927,6 +941,8 @@ DataTable.ext.buttons.csvHtml5 = {
 	},
 
 	action: function ( e, dt, button, config ) {
+		this.processing( true );
+
 		// Set the text
 		var output = _exportData( dt, config ).str;
 		var charset = config.charset;
@@ -957,6 +973,8 @@ DataTable.ext.buttons.csvHtml5 = {
 			_filename( config ),
 			true
 		);
+
+		this.processing( false );
 	},
 
 	filename: '*',
@@ -993,6 +1011,9 @@ DataTable.ext.buttons.excelHtml5 = {
 	},
 
 	action: function ( e, dt, button, config ) {
+		this.processing( true );
+
+		var that = this;
 		var rowPos = 0;
 		var getXml = function ( type ) {
 			var str = excelStrings[ type ];
@@ -1044,7 +1065,10 @@ DataTable.ext.buttons.excelHtml5 = {
 				for ( var j=0, jen=_excelSpecials.length ; j<jen ; j++ ) {
 					var special = _excelSpecials[j];
 
-					if ( row[i].match && row[i].match( special.match ) ) {
+					// TODO Need to provide the ability for the specials to say
+					// if they are returning a string, since at the moment it is
+					// assumed to be a number
+					if ( row[i].match && ! row[i].match(/^0\d+/) && row[i].match( special.match ) ) {
 						var val = row[i].replace(/[^\d\.\-]/g, '');
 
 						if ( special.fmt ) {
@@ -1169,6 +1193,7 @@ DataTable.ext.buttons.excelHtml5 = {
 				.generateAsync( zipConfig )
 				.then( function ( blob ) {
 					_saveAs( blob, _filename( config ) );
+					that.processing( false );
 				} );
 		}
 		else {
@@ -1177,6 +1202,7 @@ DataTable.ext.buttons.excelHtml5 = {
 				zip.generate( zipConfig ),
 				_filename( config )
 			);
+			this.processing( false );
 		}
 	},
 
@@ -1206,7 +1232,9 @@ DataTable.ext.buttons.pdfHtml5 = {
 	},
 
 	action: function ( e, dt, button, config ) {
-		var newLine = _newLine( config );
+		this.processing( true );
+
+		var that = this;
 		var data = dt.buttons.exportData( config.exportOptions );
 		var rows = [];
 
@@ -1279,11 +1307,11 @@ DataTable.ext.buttons.pdfHtml5 = {
 		};
 
 		if ( config.message ) {
-      doc.content.unshift( {
-        text: typeof config.message == 'function' ? config.message(dt, button, config) : config.message,
-        style: 'message',
-        margin: [ 0, 0, 0, 12 ]
-      } );
+			doc.content.unshift( {
+				text: typeof config.message == 'function' ? config.message(dt, button, config) : config.message,
+				style: 'message',
+				margin: [ 0, 0, 0, 12 ]
+			} );
 		}
 
 		if ( config.title ) {
@@ -1302,12 +1330,14 @@ DataTable.ext.buttons.pdfHtml5 = {
 
 		if ( config.download === 'open' && ! _isDuffSafari() ) {
 			pdf.open();
+			this.processing( false );
 		}
 		else {
 			pdf.getBuffer( function (buffer) {
 				var blob = new Blob( [buffer], {type:'application/pdf'} );
 
 				_saveAs( blob, _filename( config ) );
+				that.processing( false );
 			} );
 		}
 	},

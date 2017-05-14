@@ -1,11 +1,11 @@
-/*! AutoFill 2.1.3
+/*! AutoFill 2.2.0
  * ©2008-2016 SpryMedia Ltd - datatables.net/license
  */
 
 /**
  * @summary     AutoFill
  * @description Add Excel like click and drag auto-fill options to DataTables
- * @version     2.1.3
+ * @version     2.2.0
  * @file        dataTables.autoFill.js
  * @author      SpryMedia Ltd (www.sprymedia.co.uk)
  * @contact     www.sprymedia.co.uk/contact
@@ -92,7 +92,13 @@ var AutoFill = function( dt, opts )
 		handle: {
 			height: 0,
 			width: 0
-		}
+		},
+
+		/**
+		 * Enabled setting
+		 * @type {Boolean}
+		 */
+		enabled: false
 	};
 
 
@@ -137,6 +143,45 @@ var AutoFill = function( dt, opts )
 
 $.extend( AutoFill.prototype, {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+	 * Public methods (exposed via the DataTables API below)
+	 */
+	enabled: function ()
+	{
+		return this.s.enabled;
+	},
+
+
+	enable: function ( flag )
+	{
+		var that = this;
+
+		if ( flag === false ) {
+			return this.disable();
+		}
+
+		this.s.enabled = true;
+
+		this._focusListener();
+
+		this.dom.handle.on( 'mousedown', function (e) {
+			that._mousedown( e );
+			return false;
+		} );
+
+		return this;
+	},
+
+	disable: function ()
+	{
+		this.s.enabled = false;
+
+		this._focusListenerRemove();
+
+		return this;
+	},
+
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 	 * Constructor
 	 */
 
@@ -151,6 +196,9 @@ $.extend( AutoFill.prototype, {
 		var dt = this.s.dt;
 		var dtScroll = $('div.dataTables_scrollBody', this.s.dt.table().container());
 
+		// Make the instance accessible to the API
+		dt.settings()[0].autoFill = this;
+
 		if ( dtScroll.length ) {
 			this.dom.dtScroll = dtScroll;
 
@@ -160,17 +208,12 @@ $.extend( AutoFill.prototype, {
 			}
 		}
 
-		this._focusListener();
-
-		this.dom.handle.on( 'mousedown', function (e) {
-			that._mousedown( e );
-			return false;
-		} );
+		if ( this.c.enable !== false ) {
+			this.enable();
+		}
 
 		dt.on( 'destroy.autoFill', function () {
-			dt.off( '.autoFill' );
-			$(dt.table().body()).off( that.s.namespace );
-			$(document.body).off( that.s.namespace );
+			that._focusListenerRemove();
 		} );
 	},
 
@@ -513,6 +556,16 @@ $.extend( AutoFill.prototype, {
 					that._detach();
 				} );
 		}
+	},
+
+
+	_focusListenerRemove: function ()
+	{
+		var dt = this.s.dt;
+
+		dt.off( '.autoFill' );
+		$(dt.table().body()).off( this.s.namespace );
+		$(document.body).off( this.s.namespace );
 	},
 
 
@@ -1002,7 +1055,7 @@ AutoFill.actions = {
  * @static
  * @type      String
  */
-AutoFill.version = '2.1.3';
+AutoFill.version = '2.2.0';
 
 
 /**
@@ -1019,6 +1072,9 @@ AutoFill.defaults = {
 
 	/** @type {column-selector} Columns to provide auto fill for */
 	columns: '', // all
+
+	/** @type {Boolean} Enable AutoFill on load */
+	enable: true,
 
 	/** @type {boolean|null} Update the cells after a drag */
 	update: null, // false is editor given, true otherwise
@@ -1037,6 +1093,41 @@ AutoFill.classes = {
 	/** @type {String} Class used by the selection button */
 	btn: 'btn'
 };
+
+
+/*
+ * API
+ */
+var Api = $.fn.dataTable.Api;
+
+// Doesn't do anything - Not documented
+Api.register( 'autoFill()', function () {
+	return this;
+} );
+
+Api.register( 'autoFill().enabled()', function () {
+	var ctx = this.context[0];
+
+	return ctx.autoFill ?
+		ctx.autoFill.enabled() :
+		false;
+} );
+
+Api.register( 'autoFill().enable()', function ( flag ) {
+	return this.iterator( 'table', function ( ctx ) {
+		if ( ctx.autoFill ) {
+			ctx.autoFill.enable( flag );
+		}
+	} );
+} );
+
+Api.register( 'autoFill().disable()', function () {
+	return this.iterator( 'table', function ( ctx ) {
+		if ( ctx.autoFill ) {
+			ctx.autoFill.disable();
+		}
+	} );
+} );
 
 
 // Attach a listener to the document which listens for DataTables initialisation

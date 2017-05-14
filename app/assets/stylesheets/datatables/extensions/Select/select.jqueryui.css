@@ -59,13 +59,13 @@ table.dataTable.display tbody > tr > .selected:hover, table.dataTable.order-colu
 table.dataTable.order-column.hover tbody > tr > .selected:hover {
   background-color: #a2aec7;
 }
-table.dataTable td.select-checkbox,
-table.dataTable th.select-checkbox {
+table.dataTable tbody td.select-checkbox,
+table.dataTable tbody th.select-checkbox {
   position: relative;
 }
-table.dataTable td.select-checkbox:before, table.dataTable td.select-checkbox:after,
-table.dataTable th.select-checkbox:before,
-table.dataTable th.select-checkbox:after {
+table.dataTable tbody td.select-checkbox:before, table.dataTable tbody td.select-checkbox:after,
+table.dataTable tbody th.select-checkbox:before,
+table.dataTable tbody th.select-checkbox:after {
   display: block;
   position: absolute;
   top: 1.2em;
@@ -74,8 +74,8 @@ table.dataTable th.select-checkbox:after {
   height: 12px;
   box-sizing: border-box;
 }
-table.dataTable td.select-checkbox:before,
-table.dataTable th.select-checkbox:before {
+table.dataTable tbody td.select-checkbox:before,
+table.dataTable tbody th.select-checkbox:before {
   content: ' ';
   margin-top: -6px;
   margin-left: -6px;
