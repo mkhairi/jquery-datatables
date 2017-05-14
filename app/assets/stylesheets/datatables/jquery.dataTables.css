@@ -49,19 +49,19 @@ table.dataTable thead .sorting_desc_disabled {
   background-position: center right;
 }
 table.dataTable thead .sorting {
-  background-image: image-url("sort_both.png");
+  background-image: image-url("datatables/sort_both.png");
 }
 table.dataTable thead .sorting_asc {
-  background-image: image-url("sort_asc.png");
+  background-image: image-url("datatables/sort_asc.png");
 }
 table.dataTable thead .sorting_desc {
-  background-image: image-url("sort_desc.png");
+  background-image: image-url("datatables/sort_desc.png");
 }
 table.dataTable thead .sorting_asc_disabled {
-  background-image: image-url("sort_asc_disabled.png");
+  background-image: image-url("datatables/sort_asc_disabled.png");
 }
 table.dataTable thead .sorting_desc_disabled {
-  background-image: image-url("sort_desc_disabled.png");
+  background-image: image-url("datatables/sort_desc_disabled.png");
 }
 table.dataTable tbody tr {
   background-color: #ffffff;
