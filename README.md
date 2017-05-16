@@ -81,7 +81,7 @@ create new file `app/assets/stylesheets/datatables.css`
 ```
 /*
 *= require datatables/jquery.dataTables
-*= require datatables/extensions/Responsive/responsive.datatables
+*= require datatables/extensions/Responsive/responsive.dataTables
 *= require datatables/extensions/Buttons/buttons.dataTables
 */
 ```
