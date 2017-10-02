@@ -6,8 +6,11 @@ Include [jQuery DataTables](http://www.datatables.net/) in your asset pipeline w
 ## Gem Installation
 
 ### Requirements
-To use this gem you need to include [jQuery](http://jquery.com/) in your applications's javascript.
-To do so you may use the [jquery-rails gem](https://github.com/rails/jquery-rails). By default rails already include it.
+
+**Rails 5.1+**
+The Rails JavaScript helpers has been rewritten in a new gem called rails-ujs and they use vanilla JavaScript, so jQuery is not a dependency of Rails anymore. Since materializecss relies on it, install it with ```bin/yarn add jquery``` or via ```gem 'jquery-rails'```  and add ```//= require jquery``` to ```application.js```. 
+
+**NOTE:** Ensure that the `sass-rails` gem is presented in your Gemfile.
 
 
 Add this line to your application's `Gemfile`:
@@ -82,7 +85,7 @@ Include the stylesheet in your `app/assets/stylesheets/application.scss`:
 @import 'datatables';
 ```
 
-create new file `app/assets/stylesheets/datatables.scss`
+Create new file `app/assets/stylesheets/datatables.scss`
 <br>
 ** default theme
 ```scss
@@ -98,6 +101,34 @@ create new file `app/assets/stylesheets/datatables.scss`
 
 ```
 *** you may refer other extensions in this directory: [click me](https://github.com/mkhairi/jquery-datatables/tree/master/app/assets/stylesheets/datatables/extensions)
+
+
+### Image asset path patch fix
+** if you using default theme or semanticui 
+
+In your `app/assets/stylesheets/datatables.scss`
+append this code
+```scss
+
+// fix image asset url
+table.dataTable thead .sorting {
+  background-image: image-url("datatables/sort_both.png");
+}
+table.dataTable thead .sorting_asc {
+  background-image: image-url("datatables/sort_asc.png");
+}
+table.dataTable thead .sorting_desc {
+  background-image: image-url("datatables/sort_desc.png");
+}
+table.dataTable thead .sorting_asc_disabled {
+  background-image: image-url("datatables/sort_asc_disabled.png");
+}
+table.dataTable thead .sorting_desc_disabled {
+  background-image: image-url("datatables/sort_desc_disabled.png");
+}
+
+```
+
 
 ### Initialization
 
