@@ -39,7 +39,7 @@ this generator will:
   -  1. append ```//= require datatables ``` add `app/assets/javascripts/application.js`
   -  2. append ```*= require datatables ``` add `app/assets/stylesheets/application.css`
   -  3. create datatable.js  in ```app/assets/javascripts/```
-  -  4. create datatable.css in  ```app/assets/stylesheets/```
+  -  4. create datatable.scss in  ```app/assets/stylesheets/```
 
 ## Manual install
 
@@ -75,23 +75,26 @@ Include the stylesheet in your `app/assets/stylesheets/application.css`:
 *= require datatables
 ```
 
-create new file `app/assets/stylesheets/datatables.css`
+or if you using scss
+
+Include the stylesheet in your `app/assets/stylesheets/application.scss`:
+```scss
+@import 'datatables';
+```
+
+create new file `app/assets/stylesheets/datatables.scss`
 <br>
 ** default theme
-```
-/*
-*= require datatables/jquery.dataTables
-*= require datatables/extensions/Responsive/responsive.dataTables
-*= require datatables/extensions/Buttons/buttons.dataTables
-*/
+```scss
+@import 'datatables/jquery.dataTables';
+@import 'datatables/extensions/Responsive/responsive.dataTables';
+@import 'datatables/extensions/Buttons/buttons.dataTables';
 ```
 ** if using boostrap theme
-```
-/*
-*= require datatables/dataTables.bootstrap4
-*= require datatables/extensions/Responsive/responsive.bootstrap4
-*= require datatables/extensions/Buttons/buttons.bootstrap4
-*/
+```scss
+@import 'datatables/dataTables.bootstrap4';
+@import 'datatables/extensions/Responsive/responsive.bootstrap4';
+@import 'datatables/extensions/Buttons/buttons.bootstrap4';
 
 ```
 *** you may refer other extensions in this directory: [click me](https://github.com/mkhairi/jquery-datatables/tree/master/app/assets/stylesheets/datatables/extensions)
