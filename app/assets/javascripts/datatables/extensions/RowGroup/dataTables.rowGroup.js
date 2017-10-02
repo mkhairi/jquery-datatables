@@ -1,11 +1,11 @@
-/*! RowGroup 1.0.0
+/*! RowGroup 1.0.1
  * ©2017 SpryMedia Ltd - datatables.net/license
  */
 
 /**
  * @summary     RowGroup
  * @description RowGrouping for DataTables
- * @version     1.0.0
+ * @version     1.0.1
  * @file        dataTables.rowGroup.js
  * @author      SpryMedia Ltd (www.sprymedia.co.uk)
  * @contact     datatables.net
@@ -68,7 +68,7 @@ var RowGroup = function ( dt, opts ) {
 	this.s = {
 		dt: new DataTable.Api( dt ),
 
-		dataFn: DataTable.ext.oApi._fnGetObjectDataFn( this.c.dataSrc ),
+		dataFn: DataTable.ext.oApi._fnGetObjectDataFn( this.c.dataSrc )
 	};
 
 	// DOM items
@@ -153,7 +153,7 @@ $.extend( RowGroup.prototype, {
 			}
 		} );
 
-		dt.on( 'column-visibility.dtrg', function () {
+		dt.on( 'column-visibility.dt.dtrg responsive-resize.dt.dtrg', function () {
 			that._adjustColspan();
 		} );
 
@@ -183,7 +183,9 @@ $.extend( RowGroup.prototype, {
 	 */
 	_colspan: function ()
 	{
-		return $( this.s.dt.columns().header() ).filter(':visible').length;
+		return this.s.dt.columns().visible().reduce( function (a, b) {
+			return a + b;
+		}, 0 );
 	},
 
 	/**
@@ -321,7 +323,7 @@ RowGroup.defaults = {
 };
 
 
-RowGroup.version = "1.0.0";
+RowGroup.version = "1.0.1";
 
 
 $.fn.dataTable.RowGroup = RowGroup;

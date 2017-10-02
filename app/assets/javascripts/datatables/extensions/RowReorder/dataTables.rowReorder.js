@@ -1,11 +1,11 @@
-/*! RowReorder 1.2.0
+/*! RowReorder 1.2.1
  * 2015-2016 SpryMedia Ltd - datatables.net/license
  */
 
 /**
  * @summary     RowReorder
  * @description Row reordering extension for DataTables
- * @version     1.2.0
+ * @version     1.2.1
  * @file        dataTables.rowReorder.js
  * @author      SpryMedia Ltd (www.sprymedia.co.uk)
  * @contact     www.sprymedia.co.uk/contact
@@ -118,7 +118,13 @@ var RowReorder = function ( dt, opts ) {
 		},
 
 		/** @type {integer} Window height cached value */
-		windowHeight: 0
+		windowHeight: 0,
+
+		/** @type {integer} Document outer height cached value */
+		documentOuterHeight: 0,
+
+		/** @type {integer} DOM clone outer height cached value */
+		domCloneOuterHeight: 0,
 	};
 
 	// DOM items
@@ -170,14 +176,20 @@ $.extend( RowReorder.prototype, {
 		// Use `table().container()` rather than just the table node for IE8 -
 		// otherwise it only works once...
 		$(dt.table().container()).on( 'mousedown.rowReorder touchstart.rowReorder', this.c.selector, function (e) {
-			if ( ! that.c.enabled ) {
+			if ( ! that.c.enable ) {
 				return;
 			}
 
 			var tr = $(this).closest('tr');
+			var row = dt.row( tr );
 
 			// Double check that it is a DataTable row
-			if ( dt.row( tr ).any() ) {
+			if ( row.any() ) {
+				that._emitEvent( 'pre-row-reorder', {
+					node: row.node(),
+					index: row.index()
+				} );
+
 				that._mouseDown( e, tr );
 				return false;
 			}
@@ -226,6 +238,7 @@ $.extend( RowReorder.prototype, {
 		this.s.middles = middles;
 		this.s.bodyTop = $( dt.table().body() ).offset().top;
 		this.s.windowHeight = $(window).height();
+		this.s.documentOuterHeight = $(document).outerHeight();
 	},
 
 
@@ -262,6 +275,7 @@ $.extend( RowReorder.prototype, {
 		clone.appendTo( 'body' );
 
 		this.dom.clone = clone;
+		this.s.domCloneOuterHeight = clone.outerHeight();
 	},
 
 
@@ -278,6 +292,7 @@ $.extend( RowReorder.prototype, {
 		var leftDiff = this._eventToPage( e, 'X' ) - start.left;
 		var snap = this.c.snapX;
 		var left;
+		var top = topDiff + start.offsetTop;
 
 		if ( snap === true ) {
 			left = start.offsetLeft;
@@ -289,8 +304,15 @@ $.extend( RowReorder.prototype, {
 			left = leftDiff + start.offsetLeft;
 		}
 
+		if(top < 0) {
+			top = 0
+		}
+		else if(top + this.s.domCloneOuterHeight > this.s.documentOuterHeight) {
+			top = this.s.documentOuterHeight - this.s.domCloneOuterHeight;
+		}
+
 		this.dom.clone.css( {
-			top: topDiff + start.offsetTop,
+			top: top,
 			left: left
 		} );
 	},
@@ -510,10 +532,33 @@ $.extend( RowReorder.prototype, {
 		// Emit event
 		this._emitEvent( 'row-reorder', eventArgs );
 
+		var update = function () {
+			if ( that.c.update ) {
+				for ( i=0, ien=fullDiff.length ; i<ien ; i++ ) {
+					var row = dt.row( fullDiff[i].node );
+					var rowData = row.data();
+
+					setDataFn( rowData, fullDiff[i].newData );
+
+					// Invalidate the cell that has the same data source as the dataSrc
+					dt.columns().every( function () {
+						if ( this.dataSrc() === dataSrc ) {
+							dt.cell( fullDiff[i].node, this.index() ).invalidate( 'data' );
+						}
+					} );
+				}
+
+				// Trigger row reordered event
+				that._emitEvent( 'row-reordered', eventArgs );
+
+				dt.draw( false );
+			}
+		};
+
 		// Editor interface
 		if ( this.c.editor ) {
 			// Disable user interaction while Editor is submitting
-			this.c.enabled = false;
+			this.c.enable = false;
 
 			this.c.editor
 				.edit(
@@ -522,32 +567,20 @@ $.extend( RowReorder.prototype, {
 					$.extend( {submit: 'changed'}, this.c.formOptions )
 				)
 				.multiSet( dataSrc, idDiff )
+				.one( 'submitUnsuccessful.rowReorder', function () {
+					dt.draw( false );
+				} )
+				.one( 'submitSuccess.rowReorder', function () {
+					update();
+				} )
 				.one( 'submitComplete', function () {
-					that.c.enabled = true;
+					that.c.enable = true;
+					that.c.editor.off( '.rowReorder' );
 				} )
 				.submit();
 		}
-
-		// Do update if required
-		if ( this.c.update ) {
-			for ( i=0, ien=fullDiff.length ; i<ien ; i++ ) {
-				var row = dt.row( fullDiff[i].node );
-				var rowData = row.data();
-
-				setDataFn( rowData, fullDiff[i].newData );
-
-				// Invalidate the cell that has the same data source as the dataSrc
-				dt.columns().every( function () {
-					if ( this.dataSrc() === dataSrc ) {
-						dt.cell( fullDiff[i].node, this.index() ).invalidate( 'data' );
-					}
-				} );
-			}
-			
-			// Trigger row reordered event
-			this._emitEvent( 'row-reordered', eventArgs );
-
-			dt.draw( false );
+		else {
+			update();
 		}
 	},
 
@@ -664,7 +697,7 @@ RowReorder.defaults = {
 	 * Enable / disable RowReorder's user interaction
 	 * @type {Boolean}
 	 */
-	enabled: true,
+	enable: true,
 
 	/**
 	 * Form options to pass to Editor when submitting a change in the row order.
@@ -717,7 +750,7 @@ Api.register( 'rowReorder.enable()', function ( toggle ) {
 
 	return this.iterator( 'table', function ( ctx ) {
 		if ( ctx.rowreorder ) {
-			ctx.rowreorder.c.enabled = toggle;
+			ctx.rowreorder.c.enable = toggle;
 		}
 	} );
 } );
@@ -725,7 +758,7 @@ Api.register( 'rowReorder.enable()', function ( toggle ) {
 Api.register( 'rowReorder.disable()', function () {
 	return this.iterator( 'table', function ( ctx ) {
 		if ( ctx.rowreorder ) {
-			ctx.rowreorder.c.enabled = false;
+			ctx.rowreorder.c.enable = false;
 		}
 	} );
 } );
@@ -737,7 +770,7 @@ Api.register( 'rowReorder.disable()', function () {
  * @name RowReorder.version
  * @static
  */
-RowReorder.version = '1.2.0';
+RowReorder.version = '1.2.1';
 
 
 $.fn.dataTable.RowReorder = RowReorder;
