@@ -1,0 +1,15 @@
+@import 'datatables/dataTables.foundation';
+
+// optional remove '//=' to enable
+
+//@import 'datatables/extensions/AutoFill/autoFill.foundation';
+//@import 'datatables/extensions/Buttons/buttons.foundation';
+//@import 'datatables/extensions/ColReorder/colReorder.foundation';
+//@import 'datatables/extensions/FixedColumns/fixedColumns.foundation';
+//@import 'datatables/extensions/FixedHeader/fixedHeader.foundation';
+//@import 'datatables/extensions/KeyTable/keyTable.foundation';
+//@import 'datatables/extensions/Responsive/responsive.foundation';
+//@import 'datatables/extensions/RowGroup/rowGroup.foundation';
+//@import 'datatables/extensions/RowReorder/rowReorder.foundation';
+//@import 'datatables/extensions/Scroller/scroller.foundation';
+//@import 'datatables/extensions/Select/select.foundation';

@@ -1,0 +1,15 @@
+@import 'datatables/dataTables.jqueryui';
+
+// optional remove '//=' to enable
+
+//@import 'datatables/extensions/AutoFill/autoFill.jqueryui';
+//@import 'datatables/extensions/Buttons/buttons.jqueryui';
+//@import 'datatables/extensions/ColReorder/colReorder.jqueryui';
+//@import 'datatables/extensions/FixedColumns/fixedColumns.jqueryui';
+//@import 'datatables/extensions/FixedHeader/fixedHeader.jqueryui';
+//@import 'datatables/extensions/KeyTable/keyTable.jqueryui';
+//@import 'datatables/extensions/Responsive/responsive.jqueryui';
+//@import 'datatables/extensions/RowGroup/rowGroup.jqueryui';
+//@import 'datatables/extensions/RowReorder/rowReorder.jqueryui';
+//@import 'datatables/extensions/Scroller/scroller.jqueryui';
+//@import 'datatables/extensions/Select/select.jqueryui';

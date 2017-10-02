@@ -1,0 +1,15 @@
+@import 'datatables/dataTables.bootstrap';
+
+// optional remove '//=' to enable
+
+//@import 'datatables/extensions/AutoFill/autoFill.bootstrap';
+//@import 'datatables/extensions/Buttons/buttons.bootstrap';
+//@import 'datatables/extensions/ColReorder/colReorder.bootstrap';
+//@import 'datatables/extensions/FixedColumns/fixedColumns.bootstrap';
+//@import 'datatables/extensions/FixedHeader/fixedHeader.bootstrap';
+//@import 'datatables/extensions/KeyTable/keyTable.bootstrap';
+//@import 'datatables/extensions/Responsive/responsive.bootstrap';
+//@import 'datatables/extensions/RowGroup/rowGroup.bootstrap';
+//@import 'datatables/extensions/RowReorder/rowReorder.bootstrap';
+//@import 'datatables/extensions/Scroller/scroller.bootstrap';
+//@import 'datatables/extensions/Select/select.bootstrap';

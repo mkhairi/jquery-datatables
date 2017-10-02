@@ -1,0 +1,15 @@
+@import 'datatables/dataTables.semanticui';
+
+// optional remove '//=' to enable
+
+//@import 'datatables/extensions/AutoFill/autoFill.semanticui';
+//@import 'datatables/extensions/Buttons/buttons.semanticui';
+//@import 'datatables/extensions/ColReorder/colReorder.semanticui';
+//@import 'datatables/extensions/FixedColumns/fixedColumns.semanticui';
+//@import 'datatables/extensions/FixedHeader/fixedHeader.semanticui';
+//@import 'datatables/extensions/KeyTable/keyTable.semanticui';
+//@import 'datatables/extensions/Responsive/responsive.semanticui';
+//@import 'datatables/extensions/RowGroup/rowGroup.semanticui';
+//@import 'datatables/extensions/RowReorder/rowReorder.semanticui';
+//@import 'datatables/extensions/Scroller/scroller.semanticui';
+//@import 'datatables/extensions/Select/select.semanticui';

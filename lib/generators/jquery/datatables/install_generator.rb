@@ -54,7 +54,7 @@ module Jquery
         
         def copy_core_file
           template "#{style}.js.tt", "app/assets/javascripts/datatables.js"
-          template "#{style}.css.tt", "app/assets/stylesheets/datatables.css"
+          template "#{style}.scss.tt", "app/assets/stylesheets/datatables.scss"
         end
 
       end

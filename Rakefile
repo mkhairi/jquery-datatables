@@ -1,3 +1,5 @@
+
+
 require "bundler/gem_tasks"
 
 datatables_dir = "DataTablesSrc" 
@@ -107,19 +109,24 @@ task :templates do
   javascripts = Dir.glob('app/assets/javascripts/**/*')
   
   frameworks.each do |framework|
-    tgt_css_file = "#{templates_dir}/#{framework}.css.tt"
+    tgt_css_file = "#{templates_dir}/#{framework}.scss.tt"
     tgt_js_file = "#{templates_dir}/#{framework}.js.tt"
     
     
     javascripts.each do |file|
       file_name = file.gsub("app/assets/javascripts/", "")
-      File.open(tgt_js_file, "a") { |f| f.puts "//=require #{file_name}"} if file_name.match(/jquery\./)
+      puts file_name
+      if file_name.match(/jquery\./)
+        File.open(tgt_js_file, "a") { |f| f.puts "//= require #{file_name.gsub('.js', '')}"} 
+        File.open(tgt_js_file, "a") { |f| f.puts "// optional change to '//=' enable)" }
+      end
     end
       
     javascripts.each do |file|
       file_name = file.gsub("app/assets/javascripts/", "")
+       puts file_name
       next if frameworks.any? { |s| file_name.match(/#{Regexp.escape(s)}/) } or file_name.match(/jquery/)
-      File.open(tgt_js_file, "a") { |f| f.puts "// require #{file_name}"} if file_name.match(/dataTables/)
+      File.open(tgt_js_file, "a") { |f| f.puts "// require #{file_name.gsub('.js', '')}"} if file_name.match(/dataTables/)
     end
     
     
@@ -129,12 +136,14 @@ task :templates do
       
       stylesheets.each do |file|
         file_name = file.gsub("app/assets/stylesheets/", "")
-        File.open(tgt_css_file, "a") { |f| f.puts "*= #{file_name}"} if file_name.match(/#{Regexp.escape(framework)}\./)
+         puts file_name
+        File.open(tgt_css_file, "a") { |f| f.puts "//@import '#{file_name.gsub('.css', '')}';"} if file_name.match(/#{Regexp.escape(framework)}\./)
       end
       
       javascripts.each do |file|
         file_name = file.gsub("app/assets/javascripts/", "")
-        File.open(tgt_js_file, "a") { |f| f.puts "//=require #{file_name}"}  if file_name.match(/#{Regexp.escape(framework)}\./)
+         puts file_name
+        File.open(tgt_js_file, "a") { |f| f.puts "// require #{file_name.gsub('.js', '')}"}  if file_name.match(/#{Regexp.escape(framework)}\./)
       end
       
     else
@@ -142,14 +151,14 @@ task :templates do
       #core first]
       stylesheets.each do |file|
         file_name = file.gsub("app/assets/stylesheets/", "")
-        File.open(tgt_css_file, "a") { |f| f.puts "*=require #{file_name}"} if file_name.match(/jquery\./)
+        File.open(tgt_css_file, "a") { |f| f.puts "//@import '#{file_name.gsub('.css', '')}';"} if file_name.match(/jquery\./)
       end
       
       #plugins
       stylesheets.each do |file|
         file_name = file.gsub("app/assets/stylesheets/", "")
         next if frameworks.any? { |s| file_name.match(/#{Regexp.escape(s)}/) } or file_name.match(/jquery/)
-        File.open(tgt_css_file, "a") { |f| f.puts "*=require '#{file_name}';"}  if file_name.match(/dataTables/)
+        File.open(tgt_css_file, "a") { |f| f.puts "//@import '#{file_name.gsub('.css', '')}';"}  if file_name.match(/dataTables/)
       end
       
     
