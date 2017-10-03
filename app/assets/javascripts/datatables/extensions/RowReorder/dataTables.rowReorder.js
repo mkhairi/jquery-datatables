@@ -1,15 +1,15 @@
-/*! RowReorder 1.2.1
- * 2015-2016 SpryMedia Ltd - datatables.net/license
+/*! RowReorder 1.2.3
+ * 2015-2017 SpryMedia Ltd - datatables.net/license
  */
 
 /**
  * @summary     RowReorder
  * @description Row reordering extension for DataTables
- * @version     1.2.1
+ * @version     1.2.3
  * @file        dataTables.rowReorder.js
  * @author      SpryMedia Ltd (www.sprymedia.co.uk)
  * @contact     www.sprymedia.co.uk/contact
- * @copyright   Copyright 2015-2016 SpryMedia Ltd.
+ * @copyright   Copyright 2015-2017 SpryMedia Ltd.
  *
  * This source file is free software, available under the following license:
  *   MIT license - http://datatables.net/license/mit
@@ -124,7 +124,7 @@ var RowReorder = function ( dt, opts ) {
 		documentOuterHeight: 0,
 
 		/** @type {integer} DOM clone outer height cached value */
-		domCloneOuterHeight: 0,
+		domCloneOuterHeight: 0
 	};
 
 	// DOM items
@@ -770,7 +770,7 @@ Api.register( 'rowReorder.disable()', function () {
  * @name RowReorder.version
  * @static
  */
-RowReorder.version = '1.2.1';
+RowReorder.version = '1.2.3';
 
 
 $.fn.dataTable.RowReorder = RowReorder;
