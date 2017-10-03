@@ -1,0 +1,10 @@
+
+$autofill-define-button: false;
+
+@import 'autoFill.dataTables.scss';
+
+div.dt-autofill-list {
+	button {
+		padding: 0.35em 1em;
+	}
+}

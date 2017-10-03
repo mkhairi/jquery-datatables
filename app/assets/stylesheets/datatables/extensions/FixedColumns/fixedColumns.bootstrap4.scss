@@ -1,0 +1,11 @@
+
+@import 'fixedColumns.bootstrap.scss';
+
+// Bootstrap 4 uses rgba for the table background colours, so we need to
+// block them out
+table.dataTable.table-striped.DTFC_Cloned tbody tr:nth-of-type(odd) {
+    background-color: #F3F3F3;
+}
+table.dataTable.table-striped.DTFC_Cloned tbody tr:nth-of-type(even) {
+    background-color: white;
+}
