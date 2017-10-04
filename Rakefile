@@ -110,7 +110,6 @@ task :fix_urls do
     puts file
     content = File.read(file)
     fixed_content = content.gsub(/url\(\'\.\.\/images\/([A-Za-z_]*.png)\'\)/, 'image-url("datatables/\1")')
-    puts fixed_content
     File.open(file, "w") { |f| f.puts fixed_content}
   end
 end
