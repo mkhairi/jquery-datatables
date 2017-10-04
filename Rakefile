@@ -18,7 +18,7 @@ namespace :images do
   task :copy do
     tgt_dir = "app/assets/images/datatables/"
     mkdir_p tgt_dir
-    Dir.glob("#{datatables_dir}/media/images/*.png") do |src_file|
+    Dir.glob("#{datatables_dir}/images/*.png") do |src_file|
       cp src_file, tgt_dir
     end
   end
@@ -34,9 +34,19 @@ namespace :javascripts do
    rm_rf "app/assets/javascripts/datatables"
   end
   
-  desc "Copy #{datatables_dir}/media/js/"
+  desc "Copy main #{datatables_dir}/js/"
   task :copy do
-    src_dir = "#{datatables_dir}/media/js/."
+    src_file = "https://raw.githubusercontent.com/DataTables/DataTables/master/media/js/jquery.dataTables.js"
+    tgt_dir = "app/assets/javascripts/datatables/"
+    mkdir_p tgt_dir
+    Dir.chdir tgt_dir do
+      %x(wget #{src_file})
+    end
+  end
+
+  desc "Copy integration #{datatables_dir}/js/"
+  task :copy do
+    src_dir = "#{datatables_dir}/js/integration/."
     tgt_dir = "app/assets/javascripts/datatables/"
     mkdir_p tgt_dir
     cp_r src_dir, tgt_dir
@@ -62,9 +72,9 @@ namespace :stylesheets do
    rm_rf "app/assets/stylesheets/datatables"
   end
 
-  desc "Copy #{datatables_dir}/media/css/"
+  desc "Copy #{datatables_dir}/css/"
   task :copy do
-    src_dir = "#{datatables_dir}/media/css/."
+    src_dir = "#{datatables_dir}/css/."
     tgt_dir = "app/assets/stylesheets/datatables/"
     mkdir_p tgt_dir
     cp_r src_dir, tgt_dir
@@ -80,17 +90,8 @@ namespace :stylesheets do
     end
   end
 
-  desc "Fix image URLs in stylesheets"
-  task :fix_urls do
-    Dir.glob('app/assets/stylesheet/datatables/*.css').each do |tgt_file|
-      content = File.read(tgt_file)
-      fixed_content = content.gsub(/url\(\"\.\.\/images\/([A-Za-z_]*.png)\"\)/, 'image-url("\1")')
-      File.open(tgt_file, "w") { |f| f.puts fixed_content}
-    end
-  end
-
   desc "Setup stylesheet assets"
-  task setup: [:clean, :copy, :copy_extensions, :fix_urls]
+  task setup: [:clean, :copy, :copy_extensions]
 end
 
 desc "Remove minified file .min"
@@ -100,6 +101,20 @@ task :cleanup do
   end
   rm "app/assets/javascripts/datatables/jquery.js"
 end
+
+
+desc "Fix image URLs in stylesheets"
+task :fix_urls do
+  puts "fix assets path"
+  Dir.glob('app/assets/stylesheets/datatables/*.scss').each do |file|
+    puts file
+    content = File.read(file)
+    fixed_content = content.gsub(/url\(\'\.\.\/images\/([A-Za-z_]*.png)\'\)/, 'image-url("datatables/\1")')
+    puts fixed_content
+    File.open(file, "w") { |f| f.puts fixed_content}
+  end
+end
+
 
 task :templates do
   templates_dir = "lib/generators/jquery/datatables/templates"
@@ -160,14 +175,10 @@ task :templates do
         next if frameworks.any? { |s| file_name.match(/#{Regexp.escape(s)}/) } or file_name.match(/jquery/)
         File.open(tgt_css_file, "a") { |f| f.puts "//@import '#{file_name.gsub('.css', '')}';"}  if file_name.match(/dataTables/)
       end
-      
-    
-      
+
     end
     
   end
-    
- 
   
 end
 
