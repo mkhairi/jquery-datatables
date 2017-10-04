@@ -103,33 +103,6 @@ Create new file `app/assets/stylesheets/datatables.scss`
 *** you may refer other extensions in this directory: [click me](https://github.com/mkhairi/jquery-datatables/tree/master/app/assets/stylesheets/datatables/extensions)
 
 
-### Image asset path patch fix
-** if you using default theme or semanticui 
-
-In your `app/assets/stylesheets/datatables.scss`
-append this code
-```scss
-
-// fix image asset url
-table.dataTable thead .sorting {
-  background-image: image-url("datatables/sort_both.png");
-}
-table.dataTable thead .sorting_asc {
-  background-image: image-url("datatables/sort_asc.png");
-}
-table.dataTable thead .sorting_desc {
-  background-image: image-url("datatables/sort_desc.png");
-}
-table.dataTable thead .sorting_asc_disabled {
-  background-image: image-url("datatables/sort_asc_disabled.png");
-}
-table.dataTable thead .sorting_desc_disabled {
-  background-image: image-url("datatables/sort_desc_disabled.png");
-}
-
-```
-
-
 ### Initialization
 
 Where needed in your JavaScripts, initialize your DataTables:
