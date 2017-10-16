@@ -115,6 +115,8 @@ $(document).ready(function() {
 
 ## Todo
  - update instructions
+ - add scaffolds generators
+ - add ajax helpers
 
 ## Contributing
 
