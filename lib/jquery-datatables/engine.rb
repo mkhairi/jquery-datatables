@@ -1,3 +1,5 @@
+require 'autoprefixer-rails'
+
 module Jquery
   module Datatables
     class Engine < ::Rails::Engine

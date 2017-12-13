@@ -1,4 +1,4 @@
-/*! Buttons for DataTables 1.4.2
+/*! Buttons for DataTables 1.5.0
  * ©2016-2017 SpryMedia Ltd - datatables.net/license
  */
 
@@ -597,6 +597,10 @@ $.extend( Buttons.prototype, {
 			button.attr( 'title', text( config.titleAttr ) );
 		}
 
+		if ( config.attr ) {
+			button.attr( config.attr );
+		}
+
 		if ( ! config.namespace ) {
 			config.namespace = '.dt-button-'+(_buttonCounter++);
 		}
@@ -689,12 +693,18 @@ $.extend( Buttons.prototype, {
 	 */
 	_keypress: function ( character, e )
 	{
+		// Check if this button press already activated on another instance of Buttons
+		if ( e._buttonsHandled ) {
+			return;
+		}
+
 		var run = function ( conf, node ) {
 			if ( ! conf.key ) {
 				return;
 			}
 
 			if ( conf.key === character ) {
+				e._buttonsHandled = true;
 				$(node).click();
 			}
 			else if ( $.isPlainObject( conf.key ) ) {
@@ -719,6 +729,7 @@ $.extend( Buttons.prototype, {
 				}
 
 				// Made it this far - it is good
+				e._buttonsHandled = true;
 				$(node).click();
 			}
 		};
@@ -1126,7 +1137,7 @@ Buttons.defaults = {
 			className: 'dt-button-collection'
 		},
 		button: {
-			tag: 'a',
+			tag: 'button',
 			className: 'dt-button',
 			active: 'active',
 			disabled: 'disabled'
@@ -1143,7 +1154,7 @@ Buttons.defaults = {
  * @type {string}
  * @static
  */
-Buttons.version = '1.4.2';
+Buttons.version = '1.5.0';
 
 
 $.extend( _dtButtons, {
@@ -1154,21 +1165,25 @@ $.extend( _dtButtons, {
 		className: 'buttons-collection',
 		action: function ( e, dt, button, config ) {
 			var host = button;
-			var hostOffset = host.offset();
+			var collectionParent = $(button).parents('div.dt-button-collection');
+			var hostPosition = host.position();
 			var tableContainer = $( dt.table().container() );
 			var multiLevel = false;
+			var insertPoint = host;
 
 			// Remove any old collection
-			if ( $('div.dt-button-background').length ) {
-				multiLevel = $('.dt-button-collection').offset();
+			if ( collectionParent.length ) {
+				multiLevel = $('.dt-button-collection').position();
+				insertPoint = collectionParent;
 				$('body').trigger( 'click.dtb-collection' );
 			}
 
 			config._collection
 				.addClass( config.collectionLayout )
 				.css( 'display', 'none' )
-				.appendTo( 'body' )
+				.insertAfter( insertPoint )
 				.fadeIn( config.fade );
+			
 
 			var position = config._collection.css( 'position' );
 
@@ -1180,29 +1195,29 @@ $.extend( _dtButtons, {
 			}
 			else if ( position === 'absolute' ) {
 				config._collection.css( {
-					top: hostOffset.top + host.outerHeight(),
-					left: hostOffset.left
+					top: hostPosition.top + host.outerHeight(),
+					left: hostPosition.left
 				} );
 
 				// calculate overflow when positioned beneath
 				var tableBottom = tableContainer.offset().top + tableContainer.height();
-				var listBottom = hostOffset.top + host.outerHeight() + config._collection.outerHeight();
+				var listBottom = hostPosition.top + host.outerHeight() + config._collection.outerHeight();
 				var bottomOverflow = listBottom - tableBottom;
 				
 				// calculate overflow when positioned above
-				var listTop = hostOffset.top - config._collection.outerHeight();
+				var listTop = hostPosition.top - config._collection.outerHeight();
 				var tableTop = tableContainer.offset().top;
 				var topOverflow = tableTop - listTop;
 				
 				// if bottom overflow is larger, move to the top because it fits better
 				if (bottomOverflow > topOverflow) {
-					config._collection.css( 'top', hostOffset.top - config._collection.outerHeight() - 5);
+					config._collection.css( 'top', hostPosition.top - config._collection.outerHeight() - 5);
 				}
 
-				var listRight = hostOffset.left + config._collection.outerWidth();
+				var listRight = hostPosition.left + config._collection.outerWidth();
 				var tableRight = tableContainer.offset().left + tableContainer.width();
 				if ( listRight > tableRight ) {
-					config._collection.css( 'left', hostOffset.left - ( listRight - tableRight ) );
+					config._collection.css( 'left', hostPosition.left - ( listRight - tableRight ) );
 				}
 			}
 			else {
@@ -1257,7 +1272,10 @@ $.extend( _dtButtons, {
 		collectionLayout: '',
 		backgroundClassName: 'dt-button-background',
 		autoClose: false,
-		fade: 400
+		fade: 400,
+		attr: {
+			'aria-haspopup': true
+		}
 	},
 	copy: function ( dt, conf ) {
 		if ( _dtButtons.copyHtml5 ) {
@@ -1601,7 +1619,7 @@ DataTable.Api.register( 'buttons.exportInfo()', function ( conf ) {
 var _filename = function ( config )
 {
 	// Backwards compatibility
-	var filename = config.filename === '*' && config.title !== '*' && config.title !== undefined ?
+	var filename = config.filename === '*' && config.title !== '*' && config.title !== undefined && config.title !== null && config.title !== '' ?
 		config.title :
 		config.filename;
 
@@ -1614,7 +1632,7 @@ var _filename = function ( config )
 	}
 
 	if ( filename.indexOf( '*' ) !== -1 ) {
-		filename = $.trim( filename.replace( '*', $('title').text() ) );
+		filename = $.trim( filename.replace( '*', $('head > title').text() ) );
 	}
 
 	// Strip characters which the OS will object to
@@ -1656,7 +1674,7 @@ var _title = function ( config )
 
 	return title === null ?
 		null : title.indexOf( '*' ) !== -1 ?
-			title.replace( '*', $('title').text() || 'Exported data' ) :
+			title.replace( '*', $('head > title').text() || 'Exported data' ) :
 			title;
 };
 
@@ -1756,8 +1774,18 @@ var _exportData = function ( dt, inOpts )
 			return config.format.footer( el ? el.innerHTML : '', idx, el );
 		} ).toArray() :
 		null;
+	
+	// If Select is available on this table, and any rows are selected, limit the export
+	// to the selected rows. If no rows are selected, all rows will be exported. Specify
+	// a `selected` modifier to control directly.
+	var modifier = $.extend( {}, config.modifier );
+	if ( dt.select && typeof dt.select.info === 'function' && modifier.selected === undefined ) {
+		if ( dt.rows( config.rows, $.extend( { selected: true }, modifier ) ).any() ) {
+			$.extend( modifier, { selected: true } )
+		}
+	}
 
-	var rowIndexes = dt.rows( config.rows, config.modifier ).indexes().toArray();
+	var rowIndexes = dt.rows( config.rows, modifier ).indexes().toArray();
 	var selectedCells = dt.cells( rowIndexes, config.columns );
 	var cells = selectedCells
 		.render( config.orthogonal )
@@ -1768,11 +1796,11 @@ var _exportData = function ( dt, inOpts )
 
 	var columns = header.length;
 	var rows = columns > 0 ? cells.length / columns : 0;
-	var body = new Array( rows );
+	var body = [ rows ];
 	var cellCounter = 0;
 
 	for ( var i=0, ien=rows ; i<ien ; i++ ) {
-		var row = new Array( columns );
+		var row = [ columns ];
 
 		for ( var j=0 ; j<columns ; j++ ) {
 			row[j] = config.format.body( cells[ cellCounter ], i, j, cellNodes[ cellCounter ] );

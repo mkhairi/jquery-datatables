@@ -915,7 +915,9 @@ var excelStrings = {
 				'<fill>'+
 					'<patternFill patternType="none" />'+
 				'</fill>'+
-				'<fill/>'+ // Excel appears to use this as a dotted background regardless of values
+				'<fill>'+ // Excel appears to use this as a dotted background regardless of values but
+					'<patternFill patternType="none" />'+ // to be valid to the schema, use a patternFill
+				'</fill>'+
 				'<fill>'+
 					'<patternFill patternType="solid">'+
 						'<fgColor rgb="FFD9D9D9" />'+
@@ -1224,7 +1226,12 @@ DataTable.ext.buttons.excelFlash = $.extend( {}, flashButton, {
 
 				// For null, undefined of blank cell, continue so it doesn't create the _createNode
 				if ( row[i] === null || row[i] === undefined || row[i] === '' ) {
-					continue;
+					if ( config.createEmptyCells === true ) {
+						row[i] = true;
+					}
+					else {
+						continue;
+					}
 				}
 
 				row[i] = $.trim( row[i] );
@@ -1387,7 +1394,9 @@ DataTable.ext.buttons.excelFlash = $.extend( {}, flashButton, {
 		this.processing( false );
 	},
 
-	extension: '.xlsx'
+	extension: '.xlsx',
+	
+	createEmptyCells: false
 } );
 
 
