@@ -1,4 +1,4 @@
-/*! Buttons for DataTables 1.5.0
+/*! Buttons for DataTables 1.5.1
  * ©2016-2017 SpryMedia Ltd - datatables.net/license
  */
 
@@ -1154,7 +1154,7 @@ Buttons.defaults = {
  * @type {string}
  * @static
  */
-Buttons.version = '1.5.0';
+Buttons.version = '1.5.1';
 
 
 $.extend( _dtButtons, {
@@ -1603,7 +1603,7 @@ DataTable.Api.register( 'buttons.exportInfo()', function ( conf ) {
 	return {
 		filename: _filename( conf ),
 		title: _title( conf ),
-		messageTop: _message(this, conf.messageTop || conf.message, 'top'),
+		messageTop: _message(this, conf.message || conf.messageTop, 'top'),
 		messageBottom: _message(this, conf.messageBottom, 'bottom')
 	};
 } );

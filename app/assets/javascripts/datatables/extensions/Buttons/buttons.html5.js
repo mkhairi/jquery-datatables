@@ -1034,7 +1034,7 @@ DataTable.ext.buttons.excelHtml5 = {
 				// For null, undefined of blank cell, continue so it doesn't create the _createNode
 				if ( row[i] === null || row[i] === undefined || row[i] === '' ) {
 					if ( config.createEmptyCells === true ) {
-						row[i] = true;
+						row[i] = '';
 					}
 					else {
 						continue;
@@ -1365,11 +1365,12 @@ DataTable.ext.buttons.pdfHtml5 = {
 
 		if ( config.download === 'open' && ! _isDuffSafari() ) {
 			pdf.open();
-			this.processing( false );
 		}
 		else {
 			pdf.download( info.filename );
 		}
+
+		this.processing( false );
 	},
 
 	title: '*',
