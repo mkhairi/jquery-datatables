@@ -33,7 +33,7 @@ module Jquery
         
         def insert_css_strings(css_manifest)
           content = File.read(css_manifest)
-          css_strings = "*/= require datatables\n"
+          css_strings = "*= require datatables\n"
 
           if requires_tree(content)
             insert_into_file css_manifest, css_strings, :after => "require_tree .\n"
