@@ -21,6 +21,7 @@ module Jquery
           insert_css_strings(css_manifest) if File.exists?(css_manifest)
           insert_scss_strings(scss_manifest) if File.exists?(scss_manifest)
           copy_assets_file
+          append_global_initializer
         end
 
         def copy_scaffold_template
@@ -49,6 +50,13 @@ module Jquery
           content = File.read(scss_manifest)
           scss_strings = "\n@import \"datatables\";\n"
           append_to_file scss_manifest, scss_strings
+        end
+
+        def append_global_initializer
+          init = File.expand_path(find_in_source_paths("javascripts/initializer.js.tt"))
+          content = File.read(init)
+          js_datatables = "app/assets/javascripts/datatables.js"
+          append_to_file js_datatables, content
         end
 
         def requires_tree(content)
