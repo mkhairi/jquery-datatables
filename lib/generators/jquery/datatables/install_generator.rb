@@ -9,6 +9,7 @@ module Jquery
         argument :style, :type => :string, :default => 'regular'
         # needed for thor templates
         source_root File.expand_path("../templates", __FILE__)
+        class_option :template_engine, desc: 'Template engine to be invoked (erb, haml or slim).'
         
         def add_assets
           js_manifest = 'app/assets/javascripts/application.js'
@@ -19,7 +20,13 @@ module Jquery
           insert_into_file js_manifest, js_strings, :after => "jquery_ujs\n" if File.exists?(js_manifest)
           insert_css_strings(css_manifest) if File.exists?(css_manifest)
           insert_scss_strings(scss_manifest) if File.exists?(scss_manifest)
-          copy_core_file
+          copy_assets_file
+        end
+
+        def copy_scaffold_template
+          engine = options[:template_engine]
+          copy_file "views/index.html.#{engine}", "lib/templates/#{engine}/scaffold/index.html.#{engine}"
+          copy_file "views/index.json.jbuilder", "lib/templates//rails/jbuilder/index.json.jbuilder"
         end
 
         private
@@ -52,11 +59,12 @@ module Jquery
           content.match(/require_self\s*$/)
         end
         
-        def copy_core_file
-          template "#{style}.js.tt", "app/assets/javascripts/datatables.js"
-          template "#{style}.scss.tt", "app/assets/stylesheets/datatables.scss"
+        def copy_assets_file
+          template "javascripts/#{style}.js.tt", "app/assets/javascripts/datatables.js"
+          template "stylesheets/#{style}.scss.tt", "app/assets/stylesheets/datatables.scss"
         end
 
+        
       end
     end
   end
