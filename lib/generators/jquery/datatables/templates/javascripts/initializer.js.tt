@@ -24,5 +24,7 @@ $(document).on('preInit.dt', function(e, settings) {
 
 
 $(document).on('turbolinks:load', function() {
-  $("table[id^=dttb-]").dataTable();
+  if (!$.fn.DataTable.isDataTable("table[id^=dttb-]")) {
+    $("table[id^=dttb-]").DataTable();
+  }
 });
