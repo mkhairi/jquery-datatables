@@ -41,8 +41,9 @@ rails g jquery:datatables:install bootstrap
 this generator will: 
   -  1. append ```//= require datatables ``` add `app/assets/javascripts/application.js`
   -  2. append ```*= require datatables ``` add `app/assets/stylesheets/application.css`
-  -  3. create datatable.js  in ```app/assets/javascripts/```
+  -  3. create datatable.js  in ```app/assets/javascripts/``` with default init script.
   -  4. create datatable.scss in  ```app/assets/stylesheets/```
+  -  5. create scaffold index template in ```lib/template```
 
 ## Manual install
 
@@ -103,7 +104,7 @@ Create new file `app/assets/stylesheets/datatables.scss`
 *** you may refer other extensions in this directory: [click me](https://github.com/mkhairi/jquery-datatables/tree/master/app/assets/stylesheets/datatables/extensions)
 
 
-### Initialization
+### Basic Initialization
 
 Where needed in your JavaScripts, initialize your DataTables:
 
@@ -113,10 +114,15 @@ $(document).ready(function() {
 });
 ```
 
-## Todo
- - update instructions
- - add scaffolds generators
- - add ajax helpers
+### Server Side processing
+
+Recommended use this gem
+
+```ruby
+ gem 'ajax-datatables-rails'
+```
+see [docs](https://github.com/jbox-web/ajax-datatables-rails) for details instruction
+
 
 ## Contributing
 
