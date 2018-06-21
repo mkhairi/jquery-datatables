@@ -1,0 +1,53 @@
+div.alphabet {
+   clear:both;
+	position:relative;
+	margin:0.5em 0;
+}
+
+@media screen and (max-width:767px){
+	div.alphabet {
+		text-align:center;
+	}
+}
+
+div.alphabet ul.pagination {
+	margin:0;
+}
+
+div.alphabet ul.pagination > li {
+	display:inline-block;
+}
+
+div.alphabet a span {
+	opacity:1;
+}
+
+div.alphabet a.empty span {
+	opacity:0.3;
+}
+
+div.alphabet a.empty.active span {
+	opacity:1;
+}
+
+div.alphabet .alphabet-info-display {
+	vertical-align:top;
+	margin-right:0.5em;
+}
+
+div.alphabet div.alphabet-info {
+	position:absolute;
+	background-color:#111;
+	border-radius:3px;
+	color:#FFF;
+	margin-top:0.2em;
+	padding:0.2em 0.4em;
+	text-align:center;
+	opacity:0;
+	transition:opacity .4s ease-in-out;
+	z-index:9999;
+}
+
+tr.alphabet-group, tr.alphabet-group:hover {
+	background-color:rgba(0,0,0,0.15) !important;
+}
