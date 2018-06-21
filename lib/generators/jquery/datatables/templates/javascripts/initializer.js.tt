@@ -1,6 +1,6 @@
 
 
-//global setting and intializer
+//Global setting and initializer
 
 $.extend( $.fn.dataTable.defaults, {
   responsive: true,
