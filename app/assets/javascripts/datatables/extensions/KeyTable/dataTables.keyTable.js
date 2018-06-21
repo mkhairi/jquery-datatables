@@ -1,15 +1,15 @@
-/*! KeyTable 2.3.2
- * ©2009-2017 SpryMedia Ltd - datatables.net/license
+/*! KeyTable 2.4.0
+ * ©2009-2018 SpryMedia Ltd - datatables.net/license
  */
 
 /**
  * @summary     KeyTable
  * @description Spreadsheet like keyboard navigation for DataTables
- * @version     2.3.2
+ * @version     2.4.0
  * @file        dataTables.keyTable.js
  * @author      SpryMedia Ltd (www.sprymedia.co.uk)
  * @contact     www.sprymedia.co.uk/contact
- * @copyright   Copyright 2009-2017 SpryMedia Ltd.
+ * @copyright   Copyright 2009-2018 SpryMedia Ltd.
  *
  * This source file is free software, available under the following license:
  *   MIT license - http://datatables.net/license/mit
@@ -287,12 +287,19 @@ $.extend( KeyTable.prototype, {
 			}
 		} );
 
+		// Clipboard support
+		if ( this.c.clipboard ) {
+			this._clipboard();
+		}
+
 		dt.on( 'destroy.keyTable', function () {
 			dt.off( '.keyTable' );
 			$( dt.table().body() ).off( 'click.keyTable', 'th, td' );
-			$( document.body )
+			$( document )
 				.off( 'keydown.keyTable' )
-				.off( 'click.keyTable' );
+				.off( 'click.keyTable' )
+				.off( 'copy.keyTable' )
+				.off( 'paste.keyTable' );
 		} );
 
 		// Initial focus comes from state or options
@@ -313,8 +320,6 @@ $.extend( KeyTable.prototype, {
 			dt.cell( this.c.focus ).focus();
 		}
 	},
-
-
 
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -342,44 +347,71 @@ $.extend( KeyTable.prototype, {
 		this._emitEvent( 'key-blur', [ this.s.dt, cell ] );
 	},
 
+
 	/**
-	 * Copy text from the focused cell to clipboard
+	 * Clipboard interaction handlers
 	 *
 	 * @private
 	 */
-	_clipboardCopy: function ()
-	{
+	_clipboard: function () {
 		var dt = this.s.dt;
+		var that = this;
 
-		// If there is a cell focused, and there is no other text selected
-		// allow the focused cell's text to be copied to clipboard
-		if ( this.s.lastFocus && window.getSelection && !window.getSelection().toString() ) {
-			var cell = this.s.lastFocus.cell;
-			var text = cell.render('display');
-			var hiddenDiv = $('<div/>')
-				.css( {
-					height: 1,
-					width: 1,
-					overflow: 'hidden',
-					position: 'fixed',
-					top: 0,
-					left: 0
-				} );
-			var textarea = $('<textarea readonly/>')
-				.val( text )
-				.appendTo( hiddenDiv );
-
-			try {
-				hiddenDiv.appendTo( dt.table().container() );
-				textarea[0].focus();
-				textarea[0].select();
-
-				document.execCommand( 'copy' );
-			}
-			catch (e) {}
-
-			hiddenDiv.remove();
+		// IE8 doesn't support getting selected text
+		if ( ! window.getSelection ) {
+			return;
 		}
+
+		$(document).on( 'copy.keyTable', function (ejq) {
+			var e = ejq.originalEvent;
+			var selection = window.getSelection().toString();
+			var focused = that.s.lastFocus;
+
+			// Only copy cell text to clipboard if there is no other selection
+			// and there is a focused cell
+			if ( ! selection && focused ) {
+				e.clipboardData.setData(
+					'text/plain',
+					focused.cell.render( that.c.clipboardOrthogonal )
+				);
+				e.preventDefault();
+			}
+		} );
+
+		$(document).on( 'paste.keyTable', function (ejq) {
+			var e = ejq.originalEvent;
+			var focused = that.s.lastFocus;
+			var activeEl = document.activeElement;
+			var editor = that.c.editor;
+			var pastedText;
+
+			if ( focused && (! activeEl || activeEl.nodeName.toLowerCase() === 'body') ) {
+				e.preventDefault();
+
+				if ( window.clipboardData && window.clipboardData.getData ) {
+					// IE
+					pastedText = window.clipboardData.getData('Text');
+				}
+				else if ( e.clipboardData && e.clipboardData.getData ) {
+					// Everything else
+					pastedText = e.clipboardData.getData('text/plain');
+				}
+
+				if ( editor ) {
+					// Got Editor - need to activate inline editing,
+					// set the value and submit
+					editor
+						.inline( focused.cell.index() )
+						.set( editor.displayed()[0], pastedText )
+						.submit();
+				}
+				else {
+					// No editor, so just dump the data in
+					focused.cell.data( pastedText );
+					dt.draw(false);
+				}
+			}
+		} );
 	},
 
 
@@ -424,8 +456,15 @@ $.extend( KeyTable.prototype, {
 			return;
 		}
 
-		// Don't activate inline editing when the shift key is pressed
-		if ( key === 16 ) {
+		// Don't activate Editor on control key presses
+		if (
+			(key >= 0x00 && key <= 0x09) ||
+			key === 0x0b ||
+			key === 0x0c ||
+			(key >= 0x0e && key <= 0x1f) ||
+			(key >= 0x70 && key <= 0x7b) ||
+			(key >= 0x7f && key <= 0x9f)
+		) {
 			return;
 		}
 
@@ -437,38 +476,52 @@ $.extend( KeyTable.prototype, {
 			orig.preventDefault();
 		}
 
-		editor
-			.one( 'open.keyTable', function () {
-				// Remove cancel open
-				editor.off( 'cancelOpen.keyTable' );
+		var editInline = function () {
+			editor
+				.one( 'open.keyTable', function () {
+					// Remove cancel open
+					editor.off( 'cancelOpen.keyTable' );
 
-				// Excel style - select all text
-				if ( that.c.editAutoSelect ) {
-					$('div.DTE_Field_InputControl input, div.DTE_Field_InputControl textarea').select();
-				}
-
-				// Reduce the keys the Keys listens for
-				dt.keys.enable( that.c.editorKeys );
-
-				// On blur of the navigation submit
-				dt.one( 'key-blur.editor', function () {
-					if ( editor.displayed() ) {
-						editor.submit();
+					// Excel style - select all text
+					if ( that.c.editAutoSelect ) {
+						$('div.DTE_Field_InputControl input, div.DTE_Field_InputControl textarea').select();
 					}
-				} );
 
-				// Restore full key navigation on close
-				editor.one( 'close', function () {
-					dt.keys.enable( true );
-					dt.off( 'key-blur.editor' );
-				} );
-			} )
-			.one( 'cancelOpen.keyTable', function () {
-				// `preOpen` can cancel the display of the form, so it
-				// might be that the open event handler isn't needed
-				editor.off( 'open.keyTable' );
-			} )
-			.inline( this.s.lastFocus.cell.index() );
+					// Reduce the keys the Keys listens for
+					dt.keys.enable( that.c.editorKeys );
+
+					// On blur of the navigation submit
+					dt.one( 'key-blur.editor', function () {
+						if ( editor.displayed() ) {
+							editor.submit();
+						}
+					} );
+
+					// Restore full key navigation on close
+					editor.one( 'close', function () {
+						dt.keys.enable( true );
+						dt.off( 'key-blur.editor' );
+					} );
+				} )
+				.one( 'cancelOpen.keyTable', function () {
+					// `preOpen` can cancel the display of the form, so it
+					// might be that the open event handler isn't needed
+					editor.off( 'open.keyTable' );
+				} )
+				.inline( that.s.lastFocus.cell.index() );
+		};
+
+		// Editor 1.7 listens for `return` on keyup, so if return is the trigger
+		// key, we need to wait for `keyup` otherwise Editor would just submit
+		// the content triggered by this keypress.
+		if ( key === 13 ) {
+			$(document).one( 'keyup', function () { // immediately removed
+				editInline();
+			} );
+		}
+		else {
+			editInline();
+		}
 	},
 
 
@@ -515,6 +568,11 @@ $.extend( KeyTable.prototype, {
 		}
 
 		if ( typeof row !== 'number' ) {
+			// Its an API instance - check that there is actually a row
+			if ( ! row.any() ) {
+				return;
+			}
+
 			// Convert the cell to a row and column
 			var index = row.index();
 			column = index.column;
@@ -629,12 +687,7 @@ $.extend( KeyTable.prototype, {
 			return;
 		}
 
-		if ( e.ctrlKey && e.keyCode === 67 ) { // c
-			this._clipboardCopy();
-			return;
-		}
-
-		if ( e.keyCode === 0 || e.ctrlKey || e.metaKey || e.altKey ) {
+		if ( (e.keyCode === 0 || e.ctrlKey || e.metaKey || e.altKey) && !(e.ctrlKey && e.altKey) ) {
 			return;
 		}
 
@@ -646,6 +699,7 @@ $.extend( KeyTable.prototype, {
 
 		var that = this;
 		var dt = this.s.dt;
+		var scrolling = this.s.dt.settings()[0].oScroll.sY ? true : false;
 
 		// If we are not listening for this key, do nothing
 		if ( this.c.keys && $.inArray( e.keyCode, this.c.keys ) === -1 ) {
@@ -666,7 +720,7 @@ $.extend( KeyTable.prototype, {
 
 			case 33: // page up (previous page)
 			case 34: // page down (next page)
-				if ( navEnable ) {
+				if ( navEnable && !scrolling ) {
 					e.preventDefault();
 
 					dt
@@ -937,6 +991,18 @@ KeyTable.defaults = {
 	className: 'focus',
 
 	/**
+	 * Enable or disable clipboard support
+	 * @type {Boolean}
+	 */
+	clipboard: true,
+
+	/**
+	 * Orthogonal data that should be copied to clipboard
+	 * @type {string}
+	 */
+	clipboardOrthogonal: 'display',
+
+	/**
 	 * Columns that can be focused. This is automatically merged with the
 	 * visible columns as only visible columns can gain focus.
 	 * @type {String}
@@ -990,7 +1056,7 @@ KeyTable.defaults = {
 
 
 
-KeyTable.version = "2.3.2";
+KeyTable.version = "2.4.0";
 
 
 $.fn.dataTable.KeyTable = KeyTable;

@@ -1,15 +1,15 @@
-/*! AutoFill 2.2.2
- * ©2008-2017 SpryMedia Ltd - datatables.net/license
+/*! AutoFill 2.3.0
+ * ©2008-2018 SpryMedia Ltd - datatables.net/license
  */
 
 /**
  * @summary     AutoFill
  * @description Add Excel like click and drag auto-fill options to DataTables
- * @version     2.2.2
+ * @version     2.3.0
  * @file        dataTables.autoFill.js
  * @author      SpryMedia Ltd (www.sprymedia.co.uk)
  * @contact     www.sprymedia.co.uk/contact
- * @copyright   Copyright 2010-2017 SpryMedia Ltd.
+ * @copyright   Copyright 2010-2018 SpryMedia Ltd.
  *
  * This source file is free software, available under the following license:
  *   MIT license - http://datatables.net/license/mit
@@ -358,12 +358,16 @@ $.extend( AutoFill.prototype, {
 		var dt = this.s.dt;
 		var start = this.s.start;
 		var startCell = $(this.dom.start);
-		var endCell = $(target);
 		var end = {
-			row: dt.rows( { page: 'current' } ).nodes().indexOf( endCell.parent()[0] ),
-			column: endCell.index()
+			row: this.c.vertical ?
+				dt.rows( { page: 'current' } ).nodes().indexOf( target.parentNode ) :
+				start.row,
+			column: this.c.horizontal ?
+				$(target).index() :
+				start.column
 		};
 		var colIndx = dt.column.index( 'toData', end.column );
+		var endCell = $( dt.cell( ':eq('+end.row+')', colIndx ).node() );
 
 		// Be sure that is a DataTables controlled cell
 		if ( ! dt.cell( endCell ).any() ) {
@@ -587,15 +591,20 @@ $.extend( AutoFill.prototype, {
 			left = 0;
 
 		if ( ! targetParent ) {
-			targetParent = $( this.s.dt.table().node() ).offsetParent();
+			targetParent = $( $( this.s.dt.table().node() )[0].offsetParent );
 		}
 
 		do {
 			position = currNode.position();
-			currOffsetParent = currNode.offsetParent();
+
+			// jQuery doesn't give a `table` as the offset parent oddly, so use DOM directly
+			currOffsetParent = $( currNode[0].offsetParent );
 
 			top += position.top + currOffsetParent.scrollTop();
 			left += position.left + currOffsetParent.scrollLeft();
+
+			top += parseInt( currOffsetParent.css('margin-top') ) * 1;
+			top += parseInt( currOffsetParent.css('border-top-width') ) * 1;
 
 			// Emergency fall back. Shouldn't happen, but just in case!
 			if ( currNode.get(0).nodeName.toLowerCase() === 'body' ) {
@@ -695,6 +704,7 @@ $.extend( AutoFill.prototype, {
 	{
 		$(document.body).off( '.autoFill' );
 
+		var that = this;
 		var dt = this.s.dt;
 		var select = this.dom.select;
 		select.top.remove();
@@ -710,6 +720,27 @@ $.extend( AutoFill.prototype, {
 
 		// Haven't selected multiple cells, so nothing to do
 		if ( start.row === end.row && start.column === end.column ) {
+			return;
+		}
+
+		var startDt = dt.cell( ':eq('+start.row+')', start.column+':visible', {page:'current'} );
+
+		// If Editor is active inside this cell (inline editing) we need to wait for Editor to
+		// submit and then we can loop back and trigger the fill.
+		if ( $('div.DTE', startDt.node()).length ) {
+			var editor = dt.editor();
+
+			editor
+				.on( 'submitSuccess.kt', function () {
+					editor.off( '.kt');
+					that._mouseup( e );
+				} )
+				.on( 'submitComplete.kt preSubmitCancelled.kt', function () {
+					editor.off( '.kt');
+				} );
+			
+			editor.submit();
+
 			return;
 		}
 
@@ -950,7 +981,10 @@ $.extend( AutoFill.prototype, {
 AutoFill.actions = {
 	increment: {
 		available: function ( dt, cells ) {
-			return $.isNumeric( cells[0][0].label );
+			var d = cells[0][0].label;
+
+			// is numeric test based on jQuery's old `isNumeric` function
+			return !isNaN( d - parseFloat( d ) );
 		},
 
 		option: function ( dt, cells ) {
@@ -1055,7 +1089,7 @@ AutoFill.actions = {
  * @static
  * @type      String
  */
-AutoFill.version = '2.2.2';
+AutoFill.version = '2.3.0';
 
 
 /**
@@ -1080,7 +1114,13 @@ AutoFill.defaults = {
 	update: null, // false is editor given, true otherwise
 
 	/** @type {DataTable.Editor} Editor instance for automatic submission */
-	editor: null
+	editor: null,
+
+	/** @type {boolean} Enable vertical fill */
+	vertical: true,
+
+	/** @type {boolean} Enable horizontal fill */
+	horizontal: true
 };
 
 

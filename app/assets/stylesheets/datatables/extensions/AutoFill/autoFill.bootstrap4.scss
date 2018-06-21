@@ -6,3 +6,12 @@ $autofill-handle-background: #0275d8;
 
 @import 'autoFill.dataTables.scss';
 
+div.dt-autofill-list {
+	div.dt-autofill-question {
+		input[type=number] {
+			padding: 6px;
+			width: 60px;
+			margin: -2px 0;
+		}
+    }
+}

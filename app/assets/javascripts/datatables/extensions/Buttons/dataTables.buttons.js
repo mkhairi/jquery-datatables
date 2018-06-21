@@ -1,5 +1,5 @@
-/*! Buttons for DataTables 1.5.1
- * ©2016-2017 SpryMedia Ltd - datatables.net/license
+/*! Buttons for DataTables 1.5.2
+ * ©2016-2018 SpryMedia Ltd - datatables.net/license
  */
 
 (function( factory ){
@@ -379,8 +379,10 @@ $.extend( Buttons.prototype, {
 			this.add( buttons[i] );
 		}
 
-		dt.on( 'destroy', function () {
-			that.destroy();
+		dt.on( 'destroy', function ( e, settings ) {
+			if ( settings === dtSettings ) {
+				that.destroy();
+			}
 		} );
 
 		// Global key event binding to listen for button keys
@@ -544,7 +546,8 @@ $.extend( Buttons.prototype, {
 			] );
 		};
 
-		var button = $('<'+buttonDom.tag+'/>')
+		var tag = config.tag || buttonDom.tag;
+		var button = $('<'+tag+'/>')
 			.addClass( buttonDom.className )
 			.attr( 'tabindex', this.s.dt.settings()[0].iTabIndex )
 			.attr( 'aria-controls', this.s.dt.table().node().id )
@@ -566,8 +569,13 @@ $.extend( Buttons.prototype, {
 			} );
 
 		// Make `a` tags act like a link
-		if ( buttonDom.tag.toLowerCase() === 'a' ) {
+		if ( tag.toLowerCase() === 'a' ) {
 			button.attr( 'href', '#' );
+		}
+
+		// Button tags should have `type=button` so they don't have any default behaviour
+		if ( tag.toLowerCase() === 'button' ) {
+			button.attr( 'type', 'button' );
 		}
 
 		if ( linerDom.tag ) {
@@ -1154,7 +1162,7 @@ Buttons.defaults = {
  * @type {string}
  * @static
  */
-Buttons.version = '1.5.1';
+Buttons.version = '1.5.2';
 
 
 $.extend( _dtButtons, {
@@ -1176,6 +1184,10 @@ $.extend( _dtButtons, {
 				multiLevel = $('.dt-button-collection').position();
 				insertPoint = collectionParent;
 				$('body').trigger( 'click.dtb-collection' );
+			}
+
+			if ( insertPoint.parents('body')[0] !== document.body ) {
+				insertPoint = document.body.lastChild;
 			}
 
 			config._collection
@@ -1209,15 +1221,22 @@ $.extend( _dtButtons, {
 				var tableTop = tableContainer.offset().top;
 				var topOverflow = tableTop - listTop;
 				
-				// if bottom overflow is larger, move to the top because it fits better
-				if (bottomOverflow > topOverflow) {
+				// if bottom overflow is larger, move to the top because it fits better, or if dropup is requested
+				if (bottomOverflow > topOverflow || config.dropup) {
 					config._collection.css( 'top', hostPosition.top - config._collection.outerHeight() - 5);
 				}
 
+				// Right alignment in table container
 				var listRight = hostPosition.left + config._collection.outerWidth();
 				var tableRight = tableContainer.offset().left + tableContainer.width();
 				if ( listRight > tableRight ) {
 					config._collection.css( 'left', hostPosition.left - ( listRight - tableRight ) );
+				}
+
+				// Right alignment to window
+				var listOffsetRight = host.offset().left + config._collection.outerWidth();
+				if ( listOffsetRight > $(window).width() ) {
+					config._collection.css( 'left', hostPosition.left - (listOffsetRight-$(window).width()) );
 				}
 			}
 			else {
@@ -1234,6 +1253,19 @@ $.extend( _dtButtons, {
 				Buttons.background( true, config.backgroundClassName, config.fade );
 			}
 
+			var close = function () {
+				config._collection
+				.fadeOut( config.fade, function () {
+					config._collection.detach();
+				} );
+
+				$('div.dt-button-background').off( 'click.dtb-collection' );
+				Buttons.background( false, config.backgroundClassName, config.fade );
+
+				$('body').off( '.dtb-collection' );
+				dt.off( 'buttons-action.b-internal' );
+			};
+
 			// Need to break the 'thread' for the collection button being
 			// activated by a click - it would also trigger this event
 			setTimeout( function () {
@@ -1243,30 +1275,27 @@ $.extend( _dtButtons, {
 				// required to make it work...
 				$('div.dt-button-background').on( 'click.dtb-collection', function () {} );
 
-				$('body').on( 'click.dtb-collection', function (e) {
-					// andSelf is deprecated in jQ1.8, but we want 1.7 compat
-					var back = $.fn.addBack ? 'addBack' : 'andSelf';
+				$('body')
+					.on( 'click.dtb-collection', function (e) {
+						// andSelf is deprecated in jQ1.8, but we want 1.7 compat
+						var back = $.fn.addBack ? 'addBack' : 'andSelf';
 
-					if ( ! $(e.target).parents()[back]().filter( config._collection ).length ) {
-						config._collection
-							.fadeOut( config.fade, function () {
-								config._collection.detach();
-							} );
+						if ( ! $(e.target).parents()[back]().filter( config._collection ).length ) {
+							close();
+						}
+					} )
+					.on( 'keyup.dtb-collection', function (e) {
+						if ( e.keyCode === 27 ) {
+							close();
+						}
+					} );
 
-						$('div.dt-button-background').off( 'click.dtb-collection' );
-						Buttons.background( false, config.backgroundClassName, config.fade );
-
-						$('body').off( 'click.dtb-collection' );
-						dt.off( 'buttons-action.b-internal' );
-					}
-				} );
+				if ( config.autoClose ) {
+					dt.on( 'buttons-action.b-internal', function () {
+						close();
+					} );
+				}
 			}, 10 );
-
-			if ( config.autoClose ) {
-				dt.on( 'buttons-action.b-internal', function () {
-					$('div.dt-button-background').click();
-				} );
-			}
 		},
 		background: true,
 		collectionLayout: '',
@@ -1731,7 +1760,8 @@ var _exportData = function ( dt, inOpts )
 			body: function ( d ) {
 				return strip( d );
 			}
-		}
+		},
+		customizeData: null
 	}, inOpts );
 
 	var strip = function ( str ) {
@@ -1741,6 +1771,9 @@ var _exportData = function ( dt, inOpts )
 
 		// Always remove script tags
 		str = str.replace( /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '' );
+
+		// Always remove comments
+		str = str.replace( /<!\-\-.*?\-\->/g, '' );
 
 		if ( config.stripHtml ) {
 			str = str.replace( /<[^>]*>/g, '' );
@@ -1796,7 +1829,7 @@ var _exportData = function ( dt, inOpts )
 
 	var columns = header.length;
 	var rows = columns > 0 ? cells.length / columns : 0;
-	var body = [ rows ];
+	var body = [];
 	var cellCounter = 0;
 
 	for ( var i=0, ien=rows ; i<ien ; i++ ) {
@@ -1810,11 +1843,17 @@ var _exportData = function ( dt, inOpts )
 		body[i] = row;
 	}
 
-	return {
+	var data = {
 		header: header,
 		footer: footer,
 		body:   body
 	};
+
+	if ( config.customizeData ) {
+		config.customizeData( data );
+	}
+
+	return data;
 };
 
 
