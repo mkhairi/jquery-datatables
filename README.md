@@ -31,10 +31,10 @@ rails g jquery:datatables:install
 
 ```
 
-or if you using bootstrap
+or if you using css framework
 
 ``` 
-rails g jquery:datatables:install bootstrap 
+rails g jquery:datatables:install bootstrap4
 
 ```
 
@@ -44,6 +44,17 @@ this generator will:
   -  3. create datatable.js  in ```app/assets/javascripts/``` with default init script.
   -  4. create datatable.scss in  ```app/assets/stylesheets/```
   -  5. create scaffold index template in ```lib/template```
+
+
+available [styling](https://datatables.net/examples/styling/)
+ - bootstrap 
+ - bootstrap4
+ - foundation
+ - jqueryui
+ - sematicui
+ - material (Tech. preview)
+ - uikit (Tech. preview)
+
 
 ## Manual install
 
@@ -94,7 +105,7 @@ Create new file `app/assets/stylesheets/datatables.scss`
 @import 'datatables/extensions/Responsive/responsive.dataTables';
 @import 'datatables/extensions/Buttons/buttons.dataTables';
 ```
-** if using boostrap theme
+** if using boostrap4 theme
 ```scss
 @import 'datatables/dataTables.bootstrap4';
 @import 'datatables/extensions/Responsive/responsive.bootstrap4';
