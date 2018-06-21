@@ -22,8 +22,6 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'sass', '>= 3.5.2'
   spec.add_runtime_dependency 'autoprefixer-rails', '>= 6.0.3'
   
-  spec.add_development_dependency 'actionpack', '~> 4.1'
-  spec.add_development_dependency 'activesupport', '~> 4.1'
   spec.add_development_dependency 'sprockets-rails', '~> 2.3'
   spec.add_development_dependency 'jquery-rails', '~> 3.1'
   spec.add_development_dependency "bundler", "~> 1.7"
