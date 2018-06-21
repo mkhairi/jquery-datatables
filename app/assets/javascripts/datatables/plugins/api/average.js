@@ -29,4 +29,3 @@ jQuery.fn.dataTable.Api.register( 'average()', function () {
  
     return sum / data.length;
 } );
-
