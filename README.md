@@ -125,6 +125,24 @@ $(document).ready(function() {
 });
 ```
 
+And you will of course, need to have a html table (with a theader and tbody) with the id set to dttb. Here is an example:
+
+```html
+    <table id="dttb" class="table table-hover">
+      <thead>
+        <tr>
+          <th> Panel No</th>          
+        </tr>
+      </thead>
+      <tbody>
+        <% @panels.each do |panel| %>
+          <tr>
+            <td><%= link_to panel.no, panel %></td>            
+        <% end %>
+      </tbody>
+    </table>
+```
+
 ### Server Side processing
 
 Recommended use this gem
