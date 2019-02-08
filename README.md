@@ -137,7 +137,8 @@ And you will of course, need to have a html table (with a theader and tbody) wit
       <tbody>
         <% @panels.each do |panel| %>
           <tr>
-            <td><%= link_to panel.no, panel %></td>            
+            <td><%= link_to panel.no, panel %></td>
+          </tr>
         <% end %>
       </tbody>
     </table>
