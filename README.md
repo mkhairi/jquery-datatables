@@ -12,7 +12,7 @@ Since Webpacker the default JavaScript compiler for Rails 6. you can install via
 
 see this [official](https://datatables.net/download/index) pages for details.
 
-But, if your app still using javascript with sprockets, this gem is still good to go.
+However, if your app still using javascript with sprockets, this gem is still good to go.
 
 
 **Rails 5.1+**
