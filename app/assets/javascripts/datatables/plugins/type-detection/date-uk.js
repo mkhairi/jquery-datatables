@@ -1,19 +1,42 @@
 /**
- * Automatically detect British (`dd/mm/yyyy`) date types. Goes with the UK 
- * date sorting plug-in.
+ * DataTables internal date sorting replies on `Date.parse()` which is part of 
+ * the Javascript language, but you may wish to sort on dates which is doesn't 
+ * recognise. The following is a plug-in for sorting dates in the format 
+ * `dd/mm/yy`.
+ * 
+ * An automatic type detection plug-in is available for this sorting plug-in.
  *
- *  @name Date (`dd/mm/yyyy`)
- *  @summary Detect data which is in the date format `dd/mm/yyyy`
+ * Please note that this plug-in is **deprecated*. The
+ * [datetime](//datatables.net/blog/2014-12-18) plug-in provides enhanced
+ * functionality and flexibility.
+ *
+ *  @name Date (dd/mm/YY)
+ *  @summary Sort dates in the format `dd/mm/YY`
  *  @author Andy McMaster
+ *  @deprecated
+ *
+ *  @example
+ *    $('#example').dataTable( {
+ *       columnDefs: [
+ *         { type: 'date-uk', targets: 0 }
+ *       ]
+ *    } );
  */
 
-jQuery.fn.dataTableExt.aTypes.unshift(
-	function ( sData )
-	{
-		if (sData !== null && sData.match(/^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[012])\/(19|20|21)\d\d$/))
-		{
-			return 'date-uk';
+jQuery.extend(jQuery.fn.dataTableExt.oSort, {
+	"date-uk-pre": function (a) {
+		if (a == null || a == "") {
+			return 0;
 		}
-		return null;
+		var ukDatea = a.split('/');
+		return (ukDatea[2] + ukDatea[1] + ukDatea[0]) * 1;
+	},
+
+	"date-uk-asc": function (a, b) {
+		return ((a < b) ? -1 : ((a > b) ? 1 : 0));
+	},
+
+	"date-uk-desc": function (a, b) {
+		return ((a < b) ? 1 : ((a > b) ? -1 : 0));
 	}
-);
+});
