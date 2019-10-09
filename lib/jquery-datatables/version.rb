@@ -1,6 +1,6 @@
 module Jquery
   module Datatables
-    VERSION = "1.10.19.1"
+    VERSION = "1.10.20"
   end
 end
 
