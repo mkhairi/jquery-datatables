@@ -1,15 +1,15 @@
-/*! AutoFill 2.3.1
- * ©2008-2018 SpryMedia Ltd - datatables.net/license
+/*! AutoFill 2.3.4
+ * ©2008-2019 SpryMedia Ltd - datatables.net/license
  */
 
 /**
  * @summary     AutoFill
  * @description Add Excel like click and drag auto-fill options to DataTables
- * @version     2.3.1
+ * @version     2.3.4
  * @file        dataTables.autoFill.js
  * @author      SpryMedia Ltd (www.sprymedia.co.uk)
  * @contact     www.sprymedia.co.uk/contact
- * @copyright   Copyright 2010-2018 SpryMedia Ltd.
+ * @copyright   Copyright 2010-2019 SpryMedia Ltd.
  *
  * This source file is free software, available under the following license:
  *   MIT license - http://datatables.net/license/mit
@@ -367,7 +367,8 @@ $.extend( AutoFill.prototype, {
 				start.column
 		};
 		var colIndx = dt.column.index( 'toData', end.column );
-		var endCell = $( dt.cell( ':eq('+end.row+')', colIndx ).node() );
+		var endRow =  dt.row( ':eq('+end.row+')', { page: 'current' } ); // Workaround for M581
+		var endCell = $( dt.cell( endRow.index(), colIndx ).node() );
 
 		// Be sure that is a DataTables controlled cell
 		if ( ! dt.cell( endCell ).any() ) {
@@ -388,10 +389,10 @@ $.extend( AutoFill.prototype, {
 		left   = start.column < end.column ? startCell : endCell;
 		right  = start.column < end.column ? endCell   : startCell;
 
-		top    = this._getPosition( top ).top;
-		left   = this._getPosition( left ).left;
-		height = this._getPosition( bottom ).top + bottom.outerHeight() - top;
-		width  = this._getPosition( right ).left + right.outerWidth() - left;
+		top    = this._getPosition( top.get(0) ).top;
+		left   = this._getPosition( left.get(0) ).left;
+		height = this._getPosition( bottom.get(0) ).top + bottom.outerHeight() - top;
+		width  = this._getPosition( right.get(0) ).left + right.outerWidth() - left;
 
 		var select = this.dom.select;
 		select.top.css( {
@@ -584,9 +585,8 @@ $.extend( AutoFill.prototype, {
 	_getPosition: function ( node, targetParent )
 	{
 		var
-			currNode = $(node),
+			currNode = node,
 			currOffsetParent,
-			position,
 			top = 0,
 			left = 0;
 
@@ -595,23 +595,23 @@ $.extend( AutoFill.prototype, {
 		}
 
 		do {
-			position = currNode.position();
+			// Don't use jQuery().position() the behaviour changes between 1.x and 3.x for
+			// tables
+			var positionTop = currNode.offsetTop;
+			var positionLeft = currNode.offsetLeft;
 
 			// jQuery doesn't give a `table` as the offset parent oddly, so use DOM directly
-			currOffsetParent = $( currNode[0].offsetParent );
+			currOffsetParent = $( currNode.offsetParent );
 
-			top += position.top + currOffsetParent.scrollTop();
-			left += position.left + currOffsetParent.scrollLeft();
-
-			top += parseInt( currOffsetParent.css('margin-top') ) * 1;
-			top += parseInt( currOffsetParent.css('border-top-width') ) * 1;
+			top += positionTop + parseInt( currOffsetParent.css('border-top-width') ) * 1;
+			left += positionLeft + parseInt( currOffsetParent.css('border-left-width') ) * 1;
 
 			// Emergency fall back. Shouldn't happen, but just in case!
-			if ( currNode.get(0).nodeName.toLowerCase() === 'body' ) {
+			if ( currNode.nodeName.toLowerCase() === 'body' ) {
 				break;
 			}
 
-			currNode = currOffsetParent; // for next loop
+			currNode = currOffsetParent.get(0); // for next loop
 		}
 		while ( currOffsetParent.get(0) !== targetParent.get(0) )
 
@@ -731,14 +731,18 @@ $.extend( AutoFill.prototype, {
 			var editor = dt.editor();
 
 			editor
-				.on( 'submitSuccess.kt', function () {
-					editor.off( '.kt');
-					that._mouseup( e );
+				.on( 'submitSuccess.dtaf close.dtaf', function () {
+					editor.off( '.dtaf');
+
+					setTimeout( function () {
+						that._mouseup( e );
+					}, 100 );
 				} )
-				.on( 'submitComplete.kt preSubmitCancelled.kt', function () {
-					editor.off( '.kt');
+				.on( 'submitComplete.dtaf preSubmitCancelled.dtaf close.dtaf', function () {
+					editor.off( '.dtaf');
 				} );
-			
+
+			// Make the current input submit
 			editor.submit();
 
 			return;
@@ -750,6 +754,7 @@ $.extend( AutoFill.prototype, {
 		var selected   = [];
 		var dtSettings = dt.settings()[0];
 		var dtColumns  = dtSettings.aoColumns;
+		var enabledColumns = dt.columns( this.c.columns ).indexes();
 
 		// Can't use Array.prototype.map as IE8 doesn't support it
 		// Can't use $.map as jQuery flattens 2D arrays
@@ -757,13 +762,18 @@ $.extend( AutoFill.prototype, {
 		for ( var rowIdx=0 ; rowIdx<rows.length ; rowIdx++ ) {
 			selected.push(
 				$.map( columns, function (column) {
-					var cell = dt.cell( ':eq('+rows[rowIdx]+')', column+':visible', {page:'current'} );
+					var row = dt.row( ':eq('+rows[rowIdx]+')', {page:'current'} ); // Workaround for M581
+					var cell = dt.cell( row.index(), column+':visible' );
 					var data = cell.data();
 					var cellIndex = cell.index();
 					var editField = dtColumns[ cellIndex.column ].editField;
 
 					if ( editField !== undefined ) {
 						data = dtSettings.oApi._fnGetObjectDataFn( editField )( dt.row( cellIndex.row ).data() );
+					}
+
+					if ( enabledColumns.indexOf(cellIndex.column) === -1 ) {
+						return;
 					}
 
 					return {
@@ -938,6 +948,7 @@ $.extend( AutoFill.prototype, {
 
 		var dt = this.s.dt;
 		var cell;
+		var columns = dt.columns( this.c.columns ).indexes();
 
 		// Potentially allow modifications to the cells matrix
 		this._emitEvent( 'preAutoFill', [ dt, cells ] );
@@ -958,7 +969,9 @@ $.extend( AutoFill.prototype, {
 				for ( var j=0, jen=cells[i].length ; j<jen ; j++ ) {
 					cell = cells[i][j];
 
-					cell.cell.data( cell.set );
+					if ( columns.indexOf(cell.index.column) !== -1 ) {
+						cell.cell.data( cell.set );
+					}
 				}
 			}
 
@@ -1089,7 +1102,7 @@ AutoFill.actions = {
  * @static
  * @type      String
  */
-AutoFill.version = '2.3.1';
+AutoFill.version = '2.3.4';
 
 
 /**

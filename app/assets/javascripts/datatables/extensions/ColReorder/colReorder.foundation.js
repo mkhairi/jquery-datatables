@@ -1,4 +1,4 @@
-/*! Bootstrap 4 styling wrapper for ColReorder
+/*! Foundation styling wrapper for ColReorder
  * ©2018 SpryMedia Ltd - datatables.net/license
  */
 

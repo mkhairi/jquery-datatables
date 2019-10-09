@@ -1,11 +1,19 @@
 
-$keytable-focus: #3366FF !default;
+$keytable-focus: #3366ff !default;
+$keytable-focus-alt: #ff8b33 !default;
 
-table.dataTable {
-	tbody {
+table.dataTable tbody {
+	th.focus,
+	td.focus {
+		box-shadow: inset 0 0 1px 2px $keytable-focus;
+	}
+}
+
+div.dtk-focus-alt {
+	table.dataTable tbody {
 		th.focus,
 		td.focus {
-			box-shadow: inset 0 0 1px 2px $keytable-focus;
+			box-shadow: inset 0 0 1px 2px $keytable-focus-alt;
 		}
 	}
 }

@@ -1,9 +1,27 @@
 
 
 $table-rowgroup-background: #e0e0e0 !default;
+$table-rowgroup-background-level-1: #f0f0f0 !default;
+$table-rowgroup-background-level-2: #f3f3f3 !default;
 
-table.dataTable tr.group td {
-	font-weight: bold;
+table.dataTable tr.dtrg-group td {
 	background-color: $table-rowgroup-background;
+}
+
+table.dataTable tr.dtrg-group.dtrg-level-0 td {
+	font-weight: bold;
+}
+
+table.dataTable tr.dtrg-group.dtrg-level-1 td,
+table.dataTable tr.dtrg-group.dtrg-level-2 td {
+	background-color: $table-rowgroup-background-level-1;
+	padding-top: 0.25em;
+	padding-bottom: 0.25em;
+	padding-left: 2em;
+	font-size: 0.9em;
+}
+
+table.dataTable tr.dtrg-group.dtrg-level-2 td {
+	background-color: $table-rowgroup-background-level-2;
 }
 

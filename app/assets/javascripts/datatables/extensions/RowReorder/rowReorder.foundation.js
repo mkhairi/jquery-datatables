@@ -1,4 +1,4 @@
-/*! Bootstrap 4 styling wrapper for RowReorder
+/*! Foundation styling wrapper for RowReorder
  * ©2018 SpryMedia Ltd - datatables.net/license
  */
 

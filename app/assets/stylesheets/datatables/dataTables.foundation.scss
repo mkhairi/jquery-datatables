@@ -111,19 +111,19 @@ table.dataTable thead {
 	}
 
 	.sorting {
-		background-image: image-url("datatables/sort_both.png");
+		background-image: url('../images/sort_both.png');
 	}
 	.sorting_asc {
-		background-image: image-url("datatables/sort_asc.png");
+		background-image: url('../images/sort_asc.png');
 	}
 	.sorting_desc {
-		background-image: image-url("datatables/sort_desc.png");
+		background-image: url('../images/sort_desc.png');
 	}
 	.sorting_asc_disabled {
-		background-image: image-url("datatables/sort_asc_disabled.png");
+		background-image: url('../images/sort_asc_disabled.png');
 	}
 	.sorting_desc_disabled {
-		background-image: image-url("datatables/sort_desc_disabled.png");
+		background-image: url('../images/sort_desc_disabled.png');
 	}
 }
 

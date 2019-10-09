@@ -1,4 +1,4 @@
-/*! Bootstrap 4 styling wrapper for RowGroup
+/*! Foundation styling wrapper for RowGroup
  * ©2018 SpryMedia Ltd - datatables.net/license
  */
 

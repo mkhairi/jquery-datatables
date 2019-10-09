@@ -108,6 +108,7 @@ $.extend( DataTable.ext.buttons, {
 		},
 		init: function ( dt, button, conf ) {
 			var that = this;
+			button.attr( 'data-cv-idx', conf.columns );
 
 			dt
 				.on( 'column-visibility.dt'+conf.namespace, function (e, settings) {
@@ -116,13 +117,15 @@ $.extend( DataTable.ext.buttons, {
 					}
 				} )
 				.on( 'column-reorder.dt'+conf.namespace, function (e, settings, details) {
-					// Don't rename buttons based on column name if the button
-					// controls more than one column!
 					if ( dt.columns( conf.columns ).count() !== 1 ) {
 						return;
 					}
 
-					that.text( conf._columnText( dt, conf ) );
+					// This button controls the same column index but the text for the column has
+					// changed
+					button.text( conf._columnText( dt, conf ) );
+
+					// Since its a different column, we need to check its visibility
 					that.active( dt.column( conf.columns ).visible() );
 				} );
 

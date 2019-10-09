@@ -1,4 +1,4 @@
-/*! Bootstrap 4 styling wrapper for Select
+/*! Foundation styling wrapper for Select
  * ©2018 SpryMedia Ltd - datatables.net/license
  */
 

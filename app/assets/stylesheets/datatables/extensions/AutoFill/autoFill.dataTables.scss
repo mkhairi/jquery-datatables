@@ -1,8 +1,8 @@
 
 $autofill-define-button: true !default;
 $autofill-outline: #4989de !default;
-$autofill-handle-border: 1px solid #316ad1 !default;
-$autofill-handle-background: linear-gradient(to bottom, #abcffb 0%, #4989de 100%) !default;
+$autofill-handle-background: #3366ff !default;
+$autofill-handle-background-focus: #ff8b33 !default;
 
 
 div.dt-autofill-handle {
@@ -12,8 +12,15 @@ div.dt-autofill-handle {
 	z-index: 102;
 
 	box-sizing: border-box;
-	border: $autofill-handle-border;
 	background: $autofill-handle-background;
+	cursor: pointer;
+}
+
+// KeyTable alt focus
+div.dtk-focus-alt {
+	div.dt-autofill-handle {
+		background: $autofill-handle-background-focus;
+	}
 }
 
 div.dt-autofill-select {

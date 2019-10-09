@@ -1,5 +1,5 @@
-/*! Buttons for DataTables 1.5.2
- * ©2016-2018 SpryMedia Ltd - datatables.net/license
+/*! Buttons for DataTables 1.6.0
+ * ©2016-2019 SpryMedia Ltd - datatables.net/license
  */
 
 (function( factory ){
@@ -48,6 +48,15 @@ var _dtButtons = DataTable.ext.buttons;
  */
 var Buttons = function( dt, config )
 {
+	// If not created with a `new` keyword then we return a wrapper function that
+	// will take the settings object for a DT. This allows easy use of new instances
+	// with the `layout` option - e.g. `topLeft: $.fn.dataTable.Buttons( ... )`.
+	if ( !(this instanceof Buttons) ) {
+		return function (settings) {
+			return new Buttons( settings, dt ).container();
+		};
+	}
+
 	// If there is no config set it to an empty object
 	if ( typeof( config ) === 'undefined' ) {
 		config = {};	
@@ -157,7 +166,7 @@ $.extend( Buttons.prototype, {
 			idx = split[ split.length-1 ]*1;
 		}
 
-		this._expandButton( buttons, config, false, idx );
+		this._expandButton( buttons, config, base !== undefined, idx );
 		this._draw();
 
 		return this;
@@ -248,23 +257,29 @@ $.extend( Buttons.prototype, {
 	},
 
 	/**
-	 * Get a button's node
-	 * @param  {node} node Button node
-	 * @return {jQuery} Button element
+	 * Get a button's node of the buttons container if no button is given
+	 * @param  {node} [node] Button node
+	 * @return {jQuery} Button element, or container
 	 */
 	node: function ( node )
 	{
+		if ( ! node ) {
+			return this.dom.container;
+		}
+
 		var button = this._nodeToButton( node );
 		return $(button.node);
 	},
 
 	/**
 	 * Set / get a processing class on the selected button
+	 * @param {element} node Triggering button node
 	 * @param  {boolean} flag true to add, false to remove, undefined to get
 	 * @return {boolean|Buttons} Getter value or this if a setter.
 	 */
 	processing: function ( node, flag )
 	{
+		var dt = this.s.dt;
 		var button = this._nodeToButton( node );
 
 		if ( flag === undefined ) {
@@ -272,6 +287,10 @@ $.extend( Buttons.prototype, {
 		}
 
 		$(button.node).toggleClass( 'processing', flag );
+
+		$(dt.table().node()).triggerHandler( 'buttons-processing.dt', [
+			flag, dt.button( node ), dt, $(node), button.conf
+		] );
 
 		return this;
 	},
@@ -486,10 +505,7 @@ $.extend( Buttons.prototype, {
 			}
 
 			if ( built.conf.buttons ) {
-				var collectionDom = this.c.dom.collection;
-				built.collection = $('<'+collectionDom.tag+'/>')
-					.addClass( collectionDom.className )
-					.attr( 'role', 'menu') ;
+				built.collection = $('<div/>');
 				built.conf._collection = built.collection;
 
 				this._expandButton( built.buttons, built.conf.buttons, true, attachPoint );
@@ -547,6 +563,7 @@ $.extend( Buttons.prototype, {
 		};
 
 		var tag = config.tag || buttonDom.tag;
+		var clickBlurs = config.clickBlurs === undefined ? true : config.clickBlurs
 		var button = $('<'+tag+'/>')
 			.addClass( buttonDom.className )
 			.attr( 'tabindex', this.s.dt.settings()[0].iTabIndex )
@@ -557,8 +574,9 @@ $.extend( Buttons.prototype, {
 				if ( ! button.hasClass( buttonDom.disabled ) && config.action ) {
 					action( e, dt, button, config );
 				}
-
-				button.blur();
+				if( clickBlurs ) {
+					button.blur();
+				}
 			} )
 			.on( 'keyup.dtb', function (e) {
 				if ( e.keyCode === 13 ) {
@@ -625,6 +643,13 @@ $.extend( Buttons.prototype, {
 		}
 
 		this._addKey( config );
+
+		// Style integration callback for DOM manipulation
+		// Note that this is _not_ documented. It is currently
+		// for style integration only
+		if( this.c.buttonCreated ) {
+			inserter = this.c.buttonCreated( config, inserter );
+		}
 
 		return {
 			conf:         config,
@@ -892,6 +917,181 @@ $.extend( Buttons.prototype, {
 		}
 
 		return conf;
+	},
+
+	/**
+	 * Display (and replace if there is an existing one) a popover attached to a button
+	 * @param {string|node} content Content to show
+	 * @param {DataTable.Api} hostButton DT API instance of the button
+	 * @param {object} inOpts Options (see object below for all options)
+	 */
+	_popover: function ( content, hostButton, inOpts ) {
+		var dt = hostButton;
+		var buttonsSettings = this.c;
+		var options = $.extend( {
+			align: 'button-left', // button-right, dt-container
+			autoClose: false,
+			background: true,
+			backgroundClassName: 'dt-button-background',
+			contentClassName: buttonsSettings.dom.collection.className,
+			collectionLayout: '',
+			collectionTitle: '',
+			dropup: false,
+			fade: 400,
+			rightAlignClassName: 'dt-button-right',
+			tag: buttonsSettings.dom.collection.tag
+		}, inOpts );
+		var hostNode = hostButton.node();
+
+		var close = function () {
+			$('.dt-button-collection').stop().fadeOut( options.fade, function () {
+				$(this).detach();
+			} );
+
+			$(dt.buttons( '[aria-haspopup="true"][aria-expanded="true"]' ).nodes())
+				.attr('aria-expanded', 'false');
+
+			$('div.dt-button-background').off( 'click.dtb-collection' );
+			Buttons.background( false, options.backgroundClassName, options.fade, hostNode );
+
+			$('body').off( '.dtb-collection' );
+			dt.off( 'buttons-action.b-internal' );
+		};
+
+		if (content === false) {
+			close();
+		}
+
+		var existingExpanded = $(dt.buttons( '[aria-haspopup="true"][aria-expanded="true"]' ).nodes());
+		if ( existingExpanded.length ) {
+			hostNode = existingExpanded.eq(0);
+
+			close();
+		}
+
+		content = $(content);
+
+		var tableContainer = $( hostButton.table().container() );
+
+		hostNode.attr( 'aria-expanded', 'true' );
+
+		if ( hostNode.parents('body')[0] !== document.body ) {
+			hostNode = document.body.lastChild;
+		}
+
+		var display = $('<' + options.tag + '/>')
+			.addClass(options.contentClassName)
+			.attr('role', 'menu');
+
+		if ( options.collectionTitle ) {
+			display.prepend('<div class="dt-button-collection-title">'+options.collectionTitle+'</div>');
+		}
+
+		display
+			.addClass( options.collectionLayout )
+			.css( 'display', 'none' )
+			.append( content )
+			.insertAfter( hostNode )
+			.stop()
+			.fadeIn( options.fade );
+
+		var position = display.css( 'position' );
+
+		if ( options.align === 'dt-container' ) {
+			hostNode = hostNode.parent();
+			display.css('width', tableContainer.width());
+		}
+
+		if ( position === 'absolute' ) {
+			var hostPosition = hostNode.position();
+
+			display.css( {
+				top: hostPosition.top + hostNode.outerHeight(),
+				left: hostPosition.left
+			} );
+
+			// calculate overflow when positioned beneath
+			var collectionHeight = display.outerHeight();
+			var collectionWidth = display.outerWidth();
+			var tableBottom = tableContainer.offset().top + tableContainer.height();
+			var listBottom = hostPosition.top + hostNode.outerHeight() + collectionHeight;
+			var bottomOverflow = listBottom - tableBottom;
+
+			// calculate overflow when positioned above
+			var listTop = hostPosition.top - collectionHeight;
+			var tableTop = tableContainer.offset().top;
+			var topOverflow = tableTop - listTop;
+
+			// if bottom overflow is larger, move to the top because it fits better, or if dropup is requested
+			var moveTop = hostPosition.top - collectionHeight - 5;
+			if ( (bottomOverflow > topOverflow || options.dropup) && -moveTop < tableTop ) {
+				display.css( 'top', moveTop);
+			}
+
+			// Right alignment is enabled on a class, e.g. bootstrap:
+			// $.fn.dataTable.Buttons.defaults.dom.collection.className += " dropdown-menu-right"; 
+			if ( display.hasClass( options.rightAlignClassName ) || options.align === 'button-right' ) {
+				display.css( 'left', hostPosition.left + hostNode.outerWidth() - collectionWidth );
+			}
+
+			// Right alignment in table container
+			var listRight = hostPosition.left + collectionWidth;
+			var tableRight = tableContainer.offset().left + tableContainer.width();
+			if ( listRight > tableRight ) {
+				display.css( 'left', hostPosition.left - ( listRight - tableRight ) );
+			}
+
+			// Right alignment to window
+			var listOffsetRight = hostNode.offset().left + collectionWidth;
+			if ( listOffsetRight > $(window).width() ) {
+				display.css( 'left', hostPosition.left - (listOffsetRight-$(window).width()) );
+			}
+		}
+		else {
+			// Fix position - centre on screen
+			var top = display.height() / 2;
+			if ( top > $(window).height() / 2 ) {
+				top = $(window).height() / 2;
+			}
+
+			display.css( 'marginTop', top*-1 );
+		}
+
+		if ( options.background ) {
+			Buttons.background( true, options.backgroundClassName, options.fade, hostNode );
+		}
+
+		// This is bonkers, but if we don't have a click listener on the
+		// background element, iOS Safari will ignore the body click
+		// listener below. An empty function here is all that is
+		// required to make it work...
+		$('div.dt-button-background').on( 'click.dtb-collection', function () {} );
+
+		$('body')
+			.on( 'click.dtb-collection', function (e) {
+				// andSelf is deprecated in jQ1.8, but we want 1.7 compat
+				var back = $.fn.addBack ? 'addBack' : 'andSelf';
+
+				if ( ! $(e.target).parents()[back]().filter( content ).length ) {
+					close();
+				}
+			} )
+			.on( 'keyup.dtb-collection', function (e) {
+				if ( e.keyCode === 27 ) {
+					close();
+				}
+			} );
+
+		if ( options.autoClose ) {
+			setTimeout( function () {
+				dt.on( 'buttons-action.b-internal', function (e, btn, dt, node) {
+					if ( node[0] === hostNode[0] ) {
+						return;
+					}
+					close();
+				} );
+			}, 0);
+		}
 	}
 } );
 
@@ -908,20 +1108,25 @@ $.extend( Buttons.prototype, {
  * @param  {string} Class to assign to the background
  * @static
  */
-Buttons.background = function ( show, className, fade ) {
+Buttons.background = function ( show, className, fade, insertPoint ) {
 	if ( fade === undefined ) {
 		fade = 400;
+	}
+	if ( ! insertPoint ) {
+		insertPoint = document.body;
 	}
 
 	if ( show ) {
 		$('<div/>')
 			.addClass( className )
 			.css( 'display', 'none' )
-			.appendTo( 'body' )
+			.insertAfter( insertPoint )
+			.stop()
 			.fadeIn( fade );
 	}
 	else {
-		$('body > div.'+className)
+		$('div.'+className)
+			.stop()
 			.fadeOut( fade, function () {
 				$(this)
 					.removeClass( className )
@@ -943,7 +1148,7 @@ Buttons.background = function ( show, className, fade ) {
  */
 Buttons.instanceSelector = function ( group, buttons )
 {
-	if ( ! group ) {
+	if ( group === undefined || group === null ) {
 		return $.map( buttons, function ( v ) {
 			return v.inst;
 		} );
@@ -1145,7 +1350,10 @@ Buttons.defaults = {
 			className: 'dt-button-collection'
 		},
 		button: {
-			tag: 'button',
+			// Flash buttons will not work with `<button>` in IE - it has to be `<a>`
+			tag: 'ActiveXObject' in window ?
+				'a' :
+				'button',
 			className: 'dt-button',
 			active: 'active',
 			disabled: 'disabled'
@@ -1162,7 +1370,7 @@ Buttons.defaults = {
  * @type {string}
  * @static
  */
-Buttons.version = '1.5.2';
+Buttons.version = '1.6.0';
 
 
 $.extend( _dtButtons, {
@@ -1171,140 +1379,23 @@ $.extend( _dtButtons, {
 			return dt.i18n( 'buttons.collection', 'Collection' );
 		},
 		className: 'buttons-collection',
+		init: function ( dt, button, config ) {
+			button.attr( 'aria-expanded', false );
+		},
 		action: function ( e, dt, button, config ) {
-			var host = button;
-			var collectionParent = $(button).parents('div.dt-button-collection');
-			var hostPosition = host.position();
-			var tableContainer = $( dt.table().container() );
-			var multiLevel = false;
-			var insertPoint = host;
+			e.stopPropagation();
 
-			// Remove any old collection
-			if ( collectionParent.length ) {
-				multiLevel = $('.dt-button-collection').position();
-				insertPoint = collectionParent;
-				$('body').trigger( 'click.dtb-collection' );
-			}
-
-			if ( insertPoint.parents('body')[0] !== document.body ) {
-				insertPoint = document.body.lastChild;
-			}
-
-			config._collection
-				.addClass( config.collectionLayout )
-				.css( 'display', 'none' )
-				.insertAfter( insertPoint )
-				.fadeIn( config.fade );
-			
-
-			var position = config._collection.css( 'position' );
-
-			if ( multiLevel && position === 'absolute' ) {
-				config._collection.css( {
-					top: multiLevel.top,
-					left: multiLevel.left
-				} );
-			}
-			else if ( position === 'absolute' ) {
-				config._collection.css( {
-					top: hostPosition.top + host.outerHeight(),
-					left: hostPosition.left
-				} );
-
-				// calculate overflow when positioned beneath
-				var tableBottom = tableContainer.offset().top + tableContainer.height();
-				var listBottom = hostPosition.top + host.outerHeight() + config._collection.outerHeight();
-				var bottomOverflow = listBottom - tableBottom;
-				
-				// calculate overflow when positioned above
-				var listTop = hostPosition.top - config._collection.outerHeight();
-				var tableTop = tableContainer.offset().top;
-				var topOverflow = tableTop - listTop;
-				
-				// if bottom overflow is larger, move to the top because it fits better, or if dropup is requested
-				if (bottomOverflow > topOverflow || config.dropup) {
-					config._collection.css( 'top', hostPosition.top - config._collection.outerHeight() - 5);
-				}
-
-				// Right alignment in table container
-				var listRight = hostPosition.left + config._collection.outerWidth();
-				var tableRight = tableContainer.offset().left + tableContainer.width();
-				if ( listRight > tableRight ) {
-					config._collection.css( 'left', hostPosition.left - ( listRight - tableRight ) );
-				}
-
-				// Right alignment to window
-				var listOffsetRight = host.offset().left + config._collection.outerWidth();
-				if ( listOffsetRight > $(window).width() ) {
-					config._collection.css( 'left', hostPosition.left - (listOffsetRight-$(window).width()) );
-				}
+			if ( config._collection.parents('body').length ) {
+				this.popover(false, config);
 			}
 			else {
-				// Fix position - centre on screen
-				var top = config._collection.height() / 2;
-				if ( top > $(window).height() / 2 ) {
-					top = $(window).height() / 2;
-				}
-
-				config._collection.css( 'marginTop', top*-1 );
+				this.popover(config._collection, config);
 			}
-
-			if ( config.background ) {
-				Buttons.background( true, config.backgroundClassName, config.fade );
-			}
-
-			var close = function () {
-				config._collection
-				.fadeOut( config.fade, function () {
-					config._collection.detach();
-				} );
-
-				$('div.dt-button-background').off( 'click.dtb-collection' );
-				Buttons.background( false, config.backgroundClassName, config.fade );
-
-				$('body').off( '.dtb-collection' );
-				dt.off( 'buttons-action.b-internal' );
-			};
-
-			// Need to break the 'thread' for the collection button being
-			// activated by a click - it would also trigger this event
-			setTimeout( function () {
-				// This is bonkers, but if we don't have a click listener on the
-				// background element, iOS Safari will ignore the body click
-				// listener below. An empty function here is all that is
-				// required to make it work...
-				$('div.dt-button-background').on( 'click.dtb-collection', function () {} );
-
-				$('body')
-					.on( 'click.dtb-collection', function (e) {
-						// andSelf is deprecated in jQ1.8, but we want 1.7 compat
-						var back = $.fn.addBack ? 'addBack' : 'andSelf';
-
-						if ( ! $(e.target).parents()[back]().filter( config._collection ).length ) {
-							close();
-						}
-					} )
-					.on( 'keyup.dtb-collection', function (e) {
-						if ( e.keyCode === 27 ) {
-							close();
-						}
-					} );
-
-				if ( config.autoClose ) {
-					dt.on( 'buttons-action.b-internal', function () {
-						close();
-					} );
-				}
-			}, 10 );
 		},
-		background: true,
-		collectionLayout: '',
-		backgroundClassName: 'dt-button-background',
-		autoClose: false,
-		fade: 400,
 		attr: {
 			'aria-haspopup': true
 		}
+		// Also the popover options, defined in Buttons.popover
 	},
 	copy: function ( dt, conf ) {
 		if ( _dtButtons.copyHtml5 ) {
@@ -1381,7 +1472,7 @@ $.extend( _dtButtons, {
 			init: function ( dt, node, conf ) {
 				var that = this;
 				dt.on( 'length.dt'+conf.namespace, function () {
-					that.text( text( dt ) );
+					that.text( conf.text );
 				} );
 			},
 			destroy: function ( dt, node, conf ) {
@@ -1519,8 +1610,15 @@ DataTable.Api.registerPlural( 'buttons().trigger()', 'button().trigger()', funct
 	} );
 } );
 
+// Button resolver to the popover
+DataTable.Api.register( 'button().popover()', function (content, options) {
+	return this.map( function ( set ) {
+		return set.inst._popover( content, this.button(this[0].node), options );
+	} );
+} );
+
 // Get the container elements
-DataTable.Api.registerPlural( 'buttons().containers()', 'buttons().container()', function () {
+DataTable.Api.register( 'buttons().containers()', function () {
 	var jq = $();
 	var groupSelector = this._groupSelector;
 
@@ -1537,6 +1635,11 @@ DataTable.Api.registerPlural( 'buttons().containers()', 'buttons().container()',
 	} );
 
 	return jq;
+} );
+
+DataTable.Api.register( 'buttons().container()', function () {
+	// API level of nesting is `buttons()` so we can zip into the containers method
+	return this.containers().eq(0);
 } );
 
 // Add a new button
@@ -1579,6 +1682,7 @@ DataTable.Api.register( 'buttons.info()', function ( title, message, time ) {
 	var that = this;
 
 	if ( title === false ) {
+		this.off('destroy.btn-info');
 		$('#datatables_buttons_info').fadeOut( function () {
 			$(this).remove();
 		} );
@@ -1610,6 +1714,10 @@ DataTable.Api.register( 'buttons.info()', function ( title, message, time ) {
 			that.buttons.info( false );
 		}, time );
 	}
+
+	this.on('destroy.btn-info', function () {
+		that.buttons.info(false);
+	});
 
 	return this;
 } );
@@ -1884,16 +1992,23 @@ $(document).on( 'init.dt plugin-init.dt', function (e, settings) {
 	}
 } );
 
+function _init ( settings ) {
+	var api = new DataTable.Api( settings );
+	var opts = api.init().buttons || DataTable.defaults.buttons;
+
+	return new Buttons( api, opts ).container();
+}
+
 // DataTables `dom` feature option
 DataTable.ext.feature.push( {
-	fnInit: function( settings ) {
-		var api = new DataTable.Api( settings );
-		var opts = api.init().buttons || DataTable.defaults.buttons;
-
-		return new Buttons( api, opts ).container();
-	},
+	fnInit: _init,
 	cFeature: "B"
 } );
+
+// DataTables 2 layout feature
+if ( DataTable.ext.features ) {
+	DataTable.ext.features.register( 'buttons', _init );
+}
 
 
 return Buttons;
