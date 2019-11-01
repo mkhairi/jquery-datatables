@@ -14,16 +14,20 @@ div.DTFC_LeftBodyWrapper table,
 div.DTFC_RightBodyWrapper table {
 	border-top: none;
 	margin: 0 !important;
+	z-index: 2;
 
 	// Hide sorting icons
 	thead {
-		.sorting:after,
-		.sorting_asc:after,
-		.sorting_desc:after,
-		.sorting:after,
-		.sorting_asc:after,
-		.sorting_desc:after {
-			display: none;
+		.sorting,
+		.sorting_asc,
+		.sorting_desc,
+		.sorting,
+		.sorting_asc,
+		.sorting_desc {
+			&:before,
+			&:after {
+				display: none;
+			}
 		}
 	}
 
