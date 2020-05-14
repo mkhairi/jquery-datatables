@@ -1,4 +1,4 @@
-/*! Bootstrap 4 styling wrapper for FixedHeader
+/*! Foundation styling wrapper for FixedHeader
  * ©2018 SpryMedia Ltd - datatables.net/license
  */
 

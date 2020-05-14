@@ -1,4 +1,4 @@
-/*! Bootstrap 4 styling wrapper for FixedColumns
+/*! Foundation styling wrapper for FixedColumns
  * ©2018 SpryMedia Ltd - datatables.net/license
  */
 

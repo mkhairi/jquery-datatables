@@ -58,25 +58,26 @@ table.dataTable {
 			}
 		}
 
-		> tr[role="row"] > td:first-child,
-		> tr[role="row"] > th:first-child {
+		> tr[role="row"] > td.dtr-control,
+		> tr[role="row"] > th.dtr-control {
 			position: relative;
 			padding-left: 30px;
 			cursor: pointer;
 
 			&:before {
-				top: $control-button-top;
-				left: 4px;
+				top: 50%;
+				left: 5px;
 				height: $control-button-size;
 				width: $control-button-size;
+				margin-top: -$control-button-top;
 				@include control;
 				@include control-open;
 			}
 		}
 
 		> tr.parent {
-			> td:first-child:before,
-			> th:first-child:before {
+			> td.dtr-control:before,
+			> th.dtr-control:before {
 				@include control-close;
 			}
 		}
@@ -84,12 +85,11 @@ table.dataTable {
 
 	// DataTables' `compact` styling
 	&.dtr-inline.collapsed.compact > tbody {
-		> tr > td:first-child,
-		> tr > th:first-child {
+		> tr > td.dtr-control,
+		> tr > th.dtr-control {
 			padding-left: 27px;
 
 			&:before {
-				top: 5px;
 				left: 4px;
 				height: 14px;
 				width: 14px;

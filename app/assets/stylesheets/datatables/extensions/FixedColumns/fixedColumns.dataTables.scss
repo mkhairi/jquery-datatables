@@ -20,3 +20,8 @@ div.DTFC_RightWrapper table.dataTable {
 		border-bottom: none;
 	}
 }
+
+// make the row transparent to make the message below visible
+table.dataTable.display tbody tr.DTFC_NoData {
+  background-color: transparent;
+}
