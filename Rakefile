@@ -99,7 +99,6 @@ task :cleanup do
   Dir.glob('app/assets/**/*.min.*').each do |file|
     rm file
   end
-  rm "app/assets/javascripts/datatables/jquery.js"
 end
 
 
