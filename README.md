@@ -8,15 +8,20 @@ Include [jQuery DataTables](http://www.datatables.net/) in your asset pipeline w
 ### Requirements
 
 **Rails 6.0+**
+
 Since Webpacker the default JavaScript compiler for Rails 6. you can install via yarn.
 
 see this [official](https://datatables.net/download/index) pages for details.
 
 However, if your app still using javascript with sprockets, this gem is still good to go.
+How to use [sprocket assets pipeline instead of webpacker](https://stackoverflow.com/questions/59855323/rails-6-how-to-use-the-old-sprocket-assets-pipeline-instead-of-webpacker)
 
 
 **Rails 5.1+**
-The Rails JavaScript helpers has been rewritten in a new gem called rails-ujs and they use vanilla JavaScript, so jQuery is not a dependency of Rails anymore. Since Jquery datatables relies on it, install it with ```bin/yarn add jquery``` or via ```gem 'jquery-rails'```  and add ```//= require jquery``` to ```application.js```. 
+
+The Rails JavaScript helpers has been rewritten in a new gem called rails-ujs and they use vanilla JavaScript, so jQuery is not a dependency of Rails anymore. 
+
+Since Jquery datatables relies on jQuery, you can install it with ```bin/yarn add jquery``` or via ```gem 'jquery-rails'```  and add ```//= require jquery``` to ```application.js```. 
 
 **NOTE:** Ensure that the `sass-rails` gem is presented in your Gemfile.
 
