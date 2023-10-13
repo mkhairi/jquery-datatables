@@ -1,5 +1,5 @@
 /*! Foundation integration for DataTables' Buttons
- * ©2016 SpryMedia Ltd - datatables.net/license
+ * © SpryMedia Ltd - datatables.net/license
  */
 
 (function( factory ){
@@ -11,21 +11,37 @@
 	}
 	else if ( typeof exports === 'object' ) {
 		// CommonJS
-		module.exports = function (root, $) {
-			if ( ! root ) {
-				root = window;
-			}
-
-			if ( ! $ || ! $.fn.dataTable ) {
-				$ = require('datatables.net-zf')(root, $).$;
+		var jq = require('jquery');
+		var cjsRequires = function (root, $) {
+			if ( ! $.fn.dataTable ) {
+				require('datatables.net-zf')(root, $);
 			}
 
 			if ( ! $.fn.dataTable.Buttons ) {
 				require('datatables.net-buttons')(root, $);
 			}
-
-			return factory( $, root, root.document );
 		};
+
+		if (typeof window === 'undefined') {
+			module.exports = function (root, $) {
+				if ( ! root ) {
+					// CommonJS environments without a window global must pass a
+					// root. This will give an error otherwise
+					root = window;
+				}
+
+				if ( ! $ ) {
+					$ = jq( root );
+				}
+
+				cjsRequires( root, $ );
+				return factory( $, root, root.document );
+			};
+		}
+		else {
+			cjsRequires( window, jq );
+			module.exports = factory( jq, window, window.document );
+		}
 	}
 	else {
 		// Browser
@@ -36,64 +52,71 @@
 var DataTable = $.fn.dataTable;
 
 
-// F6 has different requirements for the dropdown button set. We can use the
-// Foundation version found by DataTables in order to support both F5 and F6 in
-// the same file, but not that this requires DataTables 1.10.11+ for F6 support.
-var collection = DataTable.ext.foundationVersion === 6 ?
-	{
-		tag: 'div',
-		className: 'dropdown-pane is-open button-group stacked'
-	} :
-	{
-		tag: 'ul',
-		className: 'f-dropdown open dropdown-pane is-open',
-		button: {
-			tag: 'li',
-			className: 'small',
-			active: 'active',
-			disabled: 'disabled'
-		},
-		buttonLiner: {
-			tag: 'a'
-		}
-	};
 
-$.extend( true, DataTable.Buttons.defaults, {
+$.extend(true, DataTable.Buttons.defaults, {
 	dom: {
 		container: {
 			tag: 'div',
 			className: 'dt-buttons button-group'
 		},
-		buttonContainer: {
-			tag: null,
-			className: ''
-		},
 		button: {
 			tag: 'a',
-			className: 'button small',
-			active: 'secondary'
+			className: 'dt-button button small',
+			active: 'secondary active'
 		},
-		buttonLiner: {
-			tag: null
+		collection: {
+			action: {
+				dropHtml: ''
+			},
+			button: {
+				tag: 'li',
+				className: '',
+				active: 'dt-button-active-a',
+				liner: {
+					tag: 'a'
+				}
+			},
+			container: {
+				tag: 'div',
+				className: 'dt-button-collection',
+				content: {
+					tag: 'ul',
+					className: 'dropdown menu is-dropdown-submenu'
+				}
+			}
 		},
-		collection: collection
+		split: {
+			action: {
+				tag: 'button',
+				className: 'button small'
+			},
+			dropdown: {
+				tag: 'button',
+				className: 'button dropdown arrow-only',
+				dropHtml: ''
+			},
+			wrapper: {
+				tag: 'div',
+				className: 'button-group dt-button-split'
+			}
+		}
 	}
-} );
-
+});
 
 DataTable.ext.buttons.collection.className = 'dropdown';
 
 $(document).on('buttons-popover.dt', function () {
 	var notButton = false;
-	$('.dtsp-panesContainer').each(function() {
-		if(!$(this).is('button')){
+	$('.dtsp-panesContainer').each(function () {
+		if (!$(this).is('button')) {
 			notButton = true;
 		}
 	});
-	if(notButton){
-		$('.dtsp-panesContainer').removeClass('button-group stacked')
+	if (notButton) {
+		$('.dtsp-panesContainer').removeClass('button-group stacked');
 	}
 });
 
-return DataTable.Buttons;
+
+return DataTable;
 }));
