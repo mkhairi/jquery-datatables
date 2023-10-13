@@ -1,5 +1,5 @@
 /*! jQuery UI integration for DataTables' Buttons
- * ©2016 SpryMedia Ltd - datatables.net/license
+ * © SpryMedia Ltd - datatables.net/license
  */
 
 (function( factory ){
@@ -11,21 +11,37 @@
 	}
 	else if ( typeof exports === 'object' ) {
 		// CommonJS
-		module.exports = function (root, $) {
-			if ( ! root ) {
-				root = window;
-			}
-
-			if ( ! $ || ! $.fn.dataTable ) {
-				$ = require('datatables.net-jqui')(root, $).$;
+		var jq = require('jquery');
+		var cjsRequires = function (root, $) {
+			if ( ! $.fn.dataTable ) {
+				require('datatables.net-jqui')(root, $);
 			}
 
 			if ( ! $.fn.dataTable.Buttons ) {
 				require('datatables.net-buttons')(root, $);
 			}
-
-			return factory( $, root, root.document );
 		};
+
+		if (typeof window === 'undefined') {
+			module.exports = function (root, $) {
+				if ( ! root ) {
+					// CommonJS environments without a window global must pass a
+					// root. This will give an error otherwise
+					root = window;
+				}
+
+				if ( ! $ ) {
+					$ = jq( root );
+				}
+
+				cjsRequires( root, $ );
+				return factory( $, root, root.document );
+			};
+		}
+		else {
+			cjsRequires( window, jq );
+			module.exports = factory( jq, window, window.document );
+		}
 	}
 	else {
 		// Browser
@@ -36,27 +52,47 @@
 var DataTable = $.fn.dataTable;
 
 
-$.extend( true, DataTable.Buttons.defaults, {
+
+$.extend(true, DataTable.Buttons.defaults, {
 	dom: {
+		collection: {
+			action: {
+				dropHtml: '<span class="ui-button-icon-primary ui-icon ui-icon-triangle-1-s"/>'
+			},
+			button: {
+				active: 'dt-button-active'
+			}
+		},
 		container: {
 			className: 'dt-buttons ui-buttonset'
 		},
 		button: {
-			className: 'dt-button ui-button ui-state-default ui-button-text-only',
+			className: 'dt-button ui-button ui-corner-all',
 			disabled: 'ui-state-disabled',
-			active: 'ui-state-active'
+			active: 'ui-state-active',
+			liner: {
+				tag: '',
+				className: ''
+			}
 		},
-		buttonLiner: {
-			tag: 'span',
-			className: 'ui-button-text'
+		split: {
+			action: {
+				tag: 'button',
+				className: 'dt-button-split-drop-button ui-button ui-corner-left'
+			},
+			dropdown: {
+				tag: 'button',
+				dropHtml: '<span class="ui-button-icon-primary ui-icon ui-icon-triangle-1-s"/>',
+				className: 'dt-button-split-drop ui-button ui-corner-right'
+			},
+			wrapper: {
+				tag: 'div',
+				className: 'dt-button-split'
+			}
 		}
 	}
-} );
-
-DataTable.ext.buttons.collection.text = function ( dt ) {
-	return dt.i18n('buttons.collection', 'Collection <span class="ui-button-icon-primary ui-icon ui-icon-triangle-1-s"/>');
-};
+});
 
 
-return DataTable.Buttons;
+return DataTable;
 }));
