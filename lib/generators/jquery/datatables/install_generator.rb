@@ -17,9 +17,9 @@ module Jquery
           scss_manifest = 'app/assets/stylesheets/application.scss'
           js_strings = "//= require datatables\n"
 
-          insert_into_file js_manifest, js_strings, :after => "turbolinks\n" if File.exists?(js_manifest)
-          insert_css_strings(css_manifest) if File.exists?(css_manifest)
-          insert_scss_strings(scss_manifest) if File.exists?(scss_manifest)
+          insert_into_file js_manifest, js_strings, :after => "turbolinks\n" if File.exist?(js_manifest)
+          insert_css_strings(css_manifest) if File.exist?(css_manifest)
+          insert_scss_strings(scss_manifest) if File.exist?(scss_manifest)
           copy_assets_file
           append_global_initializer
         end
